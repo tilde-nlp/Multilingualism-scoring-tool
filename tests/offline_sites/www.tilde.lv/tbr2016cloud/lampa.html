@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Tildes Birojs 2016</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <style>
+        body {
+            font-family: Calibri,Arial,Helvetica,sans-serif;
+        }
+           #myCanvas {
+            opacity: 1;
+            -webkit-transition: opacity 2s linear;
+            transition: opacity 2s linear;
+        }
+
+        #myCanvas.hide {
+            opacity: 0;
+        }
+
+        #logo {
+            width: 150px;
+            height: 150px;
+            position: absolute;
+            top: calc(50% - 75px);
+            left: calc(50% - 70px);
+            background-image: url('tilde.png');
+            background-size: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.8;
+        }
+
+        #logo.spin {
+            animation: spin 6s linear;
+        }
+
+        @-webkit-keyframes spin {
+            50% {
+                -webkit-transform: rotate3d(0, 0, 1, 180deg) scale(1.5);
+                transform: rotate3d(0, 0, 1, 180deg) scale(1.5);
+                opacity: 0.4;
+            }
+            100% {
+                -webkit-transform: scale(1.0);
+                transform: scale(1.0);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes spin {
+             50% {
+                  transform: rotate3d(0, 0, 1, 180deg) scale(1.5);
+                  opacity: 0.4;
+             }
+             100% {
+                  transform: scale(1.0);
+                  opacity: 0.8;
+             }
+        }
+    </style>
+    <script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="js/jquery.tagcanvas.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            strechCanvas();
+			$('#myCanvas').tagcanvas({
+                shuffleTags: true,
+                noTagsMessage: false,
+				textColour: '#FFF',
+                textFont: 'Segoe UI, Arial, Helvetica, sans-serif;',               
+                txtScale: 4,
+                zoom: 1.6,
+                outlineColour: 'transparent',
+                depth: 5,
+                maxSpeed: 0.01,
+                initial: [0.05, -0.01],
+                noMouse: true,
+                weight: true,
+                weightFrom: 'data-weight',
+                weightSize: 1,
+				stretchY:0.4
+            }, 'tags');
+
+            //initClock();
+			updateData();
+            setInterval('updateData()', 120000);
+            //setInterval('updateClock()', 1000);
+        });
+        $(window).resize(function () {
+            strechCanvas();
+        });
+        function strechCanvas() {
+            $('#myCanvas').attr('width', $(window).width());
+            $('#myCanvas').attr('height', $(window).height());
+        }
+        function updateData() {
+            $('#logo').addClass('spin');
+            $('#myCanvas').addClass('hide');
+            setTimeout(function () {
+                $('#logo').removeClass('spin');
+            }, 6000);
+
+			var date = new Date();
+			var timestamp = date.getTime();
+			var maxCount=150;			
+			$.ajax({
+				url: 'https://dl.dropboxusercontent.com/s/9h5tsas8bbmuzz0/_frequencies.txt?time=' + timestamp,  
+				success: function(data) {
+					var d = $(data);
+					$('a', d).each(function (idx) {							
+						if ($(this).attr('data-weight') <= 2) {
+							var rnd = Math.floor((Math.random() * 2) + 2);
+							$(this).attr('data-weight', rnd);
+						}
+						if ($(this).attr('data-weight') > 24) {
+							$(this).attr('data-weight', 24);
+						}
+						 if (idx>maxCount){
+							 $(this).parent().detach();
+						 }
+					});	
+					console.log(d);				
+					$('#dynamicTags').html(d);
+				},
+				error: function() {
+					$('#dynamicTags').html($('#tags_offline').clone());
+					$('#dynamicTags #tags_offline').attr('id', 'tags');
+				}
+			});
+			
+            setTimeout(function () {
+                //var currIdx = parseInt($('.words.active').attr('data-idx')),
+                //    maxIdx = $('.words').length - 1,
+                //    nextIdx = (currIdx < maxIdx) ? currIdx + 1 : 0;
+
+                //$('.words').removeClass('active').removeAttr('id');
+                //$('.words[data-idx="' + nextIdx + '"]').attr('id', 'tags').addClass('active');
+                $('#myCanvas').tagcanvas('update');
+                $('#myCanvas').removeClass('hide');
+            }, 3000);
+        }      
+        function numFormat(number) {
+            return (number < 10 ? '0' : '') + number
+        }
+    </script>
+</head>
+<body style="padding:0;margin:0;background-color:#228CCC;overflow:hidden;">
+    <div id="logo"></div>
+    <div id="myCanvasContainer">
+        <canvas id="myCanvas"></canvas>
+    </div> 
+	<div id="dynamicTags"></div>
+    <div id="tags_offline" style="display: none;">
+		<ul>
+			<li><a data-weight="12">Lattelecom</a></li>
+			<li><a data-weight="10">valsts</a></li>
+			<li><a data-weight="9">Šodien</a></li>
+			<li><a data-weight="9">Latvijas</a></li>
+			<li><a data-weight="9">Sveiks</a></li>
+			<li><a data-weight="7">lūdzu</a></li>
+			<li><a data-weight="6">numuru</a></li>
+			<li><a data-weight="6">agailitis</a></li>
+			<li><a data-weight="6">plkst</a></li>
+			<li><a data-weight="5">veselības</a></li>
+			<li><a data-weight="5">Paldies</a></li>
+			<li><a data-weight="5">jautājums</a></li>
+			<li><a data-weight="5">info</a></li>
+			<li><a data-weight="4">atkal</a></li>
+			<li><a data-weight="4">teju</a></li>
+			<li><a data-weight="4">cilvēki</a></li>
+			<li><a data-weight="4">gada</a></li>
+			<li><a data-weight="3">Rīgas</a></li>
+			<li><a data-weight="3">vairāk</a></li>
+			<li><a data-weight="3">mājās</a></li>
+			<li><a data-weight="3">privātā</a></li>
+			<li><a data-weight="3">Eiropas</a></li>
+			<li><a data-weight="3">pieejams</a></li>
+			<li><a data-weight="3">laikā</a></li>
+			<li><a data-weight="3">rēķina</a></li>
+			<li><a data-weight="3">ideju</a></li>
+			<li><a data-weight="3">dziesmu</a></li>
+			<li><a data-weight="3">grupas</a></li>
+			<li><a data-weight="3">tieši</a></li>
+			<li><a data-weight="3">ai</a></li>
+			<li><a data-weight="3">Omnitel</a></li>
+			<li><a data-weight="3">hronists</a></li>
+			<li><a data-weight="3">šodien</a></li>
+			<li><a data-weight="3">viens</a></li>
+			<li><a data-weight="3">rīta</a></li>
+			<li><a data-weight="3">klāt</a></li>
+			<li><a data-weight="3">Jānis</a></li>
+			<li><a data-weight="3">noticis</a></li>
+			<li><a data-weight="3">Latvijā</a></li>
+			<li><a data-weight="3">ziņā</a></li>
+			<li><a data-weight="3">būda</a></li>
+			<li><a data-weight="3">klienta</a></li>
+			<li><a data-weight="3">filmu</a></li>
+			<li><a data-weight="3">Atsūti</a></li>
+			<li><a data-weight="3">visā</a></li>
+			<li><a data-weight="3">aprūpi</a></li>
+			<li><a data-weight="3">Knoks</a></li>
+			<li><a data-weight="2">klienti</a></li>
+			<li><a data-weight="2">diemžēl</a></li>
+			<li><a data-weight="2">kanāla</a></li>
+			<li><a data-weight="2">jauno</a></li>
+			<li><a data-weight="2">precīzu</a></li>
+			<li><a data-weight="2">Teo</a></li>
+			<li><a data-weight="2">seju</a></li>
+			<li><a data-weight="2">Zariņš</a></li>
+			<li><a data-weight="2">vefriga</a></li>
+			<li><a data-weight="2">naudu</a></li>
+			<li><a data-weight="2">bērnus</a></li>
+			<li><a data-weight="2">konkrēto</a></li>
+			<li><a data-weight="2">mobilā</a></li>
+			<li><a data-weight="2">tehnoloģiju</a></li>
+			<li><a data-weight="2">kopā</a></li>
+			<li><a data-weight="2">Lyyyyyyy</a></li>
+			<li><a data-weight="2">atbalsta</a></li>
+			<li><a data-weight="2">komandas</a></li>
+			<li><a data-weight="2">atsūtiet</a></li>
+			<li><a data-weight="2">Rīga</a></li>
+			<li><a data-weight="2">apvienoties</a></li>
+			<li><a data-weight="2">izglītībā</a></li>
+			<li><a data-weight="2">Arlietas</a></li>
+			<li><a data-weight="2">mēģināt</a></li>
+			<li><a data-weight="2">Urugvaja</a></li>
+			<li><a data-weight="2">ģeorallijs</a></li>
+			<li><a data-weight="2">negatīvās</a></li>
+			<li><a data-weight="2">laika</a></li>
+			<li><a data-weight="2">dblv</a></li>
+			<li><a data-weight="2">atnācu</a></li>
+			<li><a data-weight="2">domnīcā</a></li>
+			<li><a data-weight="2">Baltijas</a></li>
+			<li><a data-weight="2">čempionātā</a></li>
+			<li><a data-weight="2">tīklos</a></li>
+			<li><a data-weight="2">arābu</a></li>
+			<li><a data-weight="2">Palkavnieks</a></li>
+			<li><a data-weight="2">exciting</a></li>
+			<li><a data-weight="2">atdeve</a></li>
+			<li><a data-weight="2">Filmēšanas</a></li>
+			<li><a data-weight="2">izmantošanu</a></li>
+			<li><a data-weight="2">gaidīsim</a></li>
+			<li><a data-weight="2">Laivu</a></li>
+			<li><a data-weight="2">Otra</a></li>
+			<li><a data-weight="2">lielu</a></li>
+			<li><a data-weight="2">lūkosim</a></li>
+			<li><a data-weight="2">cilvēkus</a></li>
+			<li><a data-weight="2">Atzīmēja</a></li>
+			<li><a data-weight="2">sievietes</a></li>
+			<li><a data-weight="2">Jaunā</a></li>
+			<li><a data-weight="2">Bēgļu</a></li>
+			<li><a data-weight="2">news</a></li>
+			<li><a data-weight="2">apr</a></li>
+			<li><a data-weight="2">kanāls</a></li>
+			<li><a data-weight="2">patīk</a></li>
+			<li><a data-weight="2">operatoru</a></li>
+			<li><a data-weight="2">briivdabasmuzejs</a></li>
+			<li><a data-weight="2">darbā</a></li>
+			<li><a data-weight="2">iesaka</a></li>
+			<li><a data-weight="2">raidījumā</a></li>
+			<li><a data-weight="2">tumsas</a></li>
+			<li><a data-weight="2">demolēja</a></li>
+			<li><a data-weight="2">palikusi</a></li>
+			<li><a data-weight="2">rodas</a></li>
+			<li><a data-weight="2">Nr</a></li>
+			<li><a data-weight="2">Greenpeace</a></li>
+			<li><a data-weight="2">nevarēja</a></li>
+			<li><a data-weight="2">worlds</a></li>
+			<li><a data-weight="2">Cilvēks</a></li>
+			<li><a data-weight="2">Kabineta</a></li>
+			<li><a data-weight="2">Card</a></li>
+			<li><a data-weight="2">izaicinošu</a></li>
+			<li><a data-weight="2">iedzīvotāju</a></li>
+			<li><a data-weight="2">izstādi</a></li>
+			<li><a data-weight="2">speciālistu</a></li>
+			<li><a data-weight="2">Latvija</a></li>
+			<li><a data-weight="2">aicinām</a></li>
+			<li><a data-weight="2">grupās</a></li>
+			<li><a data-weight="2">Maidana</a></li>
+			<li><a data-weight="2">Cēlājos</a></li>
+			<li><a data-weight="2">Fidži</a></li>
+			<li><a data-weight="2">Ķuzis</a></li>
+			<li><a data-weight="2">darbi</a></li>
+			<li><a data-weight="2">interneta</a></li>
+			<li><a data-weight="2">Ministru</a></li>
+			<li><a data-weight="2">aizbraukt</a></li>
+			<li><a data-weight="2">darbu</a></li>
+			<li><a data-weight="2">sporta</a></li>
+			<li><a data-weight="2">garastāvoklis</a></li>
+			<li><a data-weight="2">Antru</a></li>
+			<li><a data-weight="2">vīrieti</a></li>
+			<li><a data-weight="2">oktobrim</a></li>
+			<li><a data-weight="2">uzskata</a></li>
+			<li><a data-weight="2">izmanto</a></li>
+			<li><a data-weight="2">filmshooting</a></li>
+			<li><a data-weight="2">pārstāvis</a></li>
+			<li><a data-weight="2">paaudze</a></li>
+			<li><a data-weight="2">martakrivade</a></li>
+			<li><a data-weight="2">rast</a></li>
+			<li><a data-weight="2">maksāt</a></li>
+			<li><a data-weight="2">Varam</a></li>
+			<li><a data-weight="2">brivdabasmuzejs</a></li>
+			<li><a data-weight="2">anti</a></li>
+			<li><a data-weight="2">kanālu</a></li>
+			<li><a data-weight="2">pakalpojumu</a></li>
+			<li><a data-weight="2">netici</a></li>
+			<li><a data-weight="2">liegta</a></li>
+			<li><a data-weight="2">nosaukt</a></li>
+			<li><a data-weight="2">Saruna</a></li>
+			<li><a data-weight="2">pasts</a></li>
+			<li><a data-weight="2">baidos</a></li>
+			<li><a data-weight="2">policijas</a></li>
+			<li><a data-weight="2">Lielais</a></li>
+			<li><a data-weight="2">oktobrī</a></li>
+			<li><a data-weight="2">maksas</a></li>
+			<li><a data-weight="2">ieguldīt</a></li>
+			<li><a data-weight="2">risina</a></li>
+			<li><a data-weight="2">laiku</a></li>
+			<li><a data-weight="2">Ideju</a></li>
+			<li><a data-weight="2">Balvos</a></li>
+			<li><a data-weight="2">galerijā</a></li>
+			<li><a data-weight="2">signālu</a></li>
+			<li><a data-weight="2">runāsim</a></li>
+			<li><a data-weight="2">Stafecku</a></li>
+			<li><a data-weight="2">balvu</a></li>
+			<li><a data-weight="2">akirtovskis</a></li>
+			<li><a data-weight="2">bērnu</a></li>
+			<li><a data-weight="2">atbalstu</a></li>
+			<li><a data-weight="2">Kopā</a></li>
+			<li><a data-weight="2">pēdējā</a></li>
+			<li><a data-weight="2">islāmticīgo</a></li>
+			<li><a data-weight="2">Tīkla</a></li>
+			<li><a data-weight="2">Zavileiskis</a></li>
+			<li><a data-weight="2">pakalpojumus</a></li>
+			<li><a data-weight="2">Alūksnes</a></li>
+			<li><a data-weight="2">Liedzot</a></li>
+			<li><a data-weight="2">tīklu</a></li>
+			<li><a data-weight="2">situāciju</a></li>
+			<li><a data-weight="2">piedalīties</a></li>
+			<li><a data-weight="2">nodokļus</a></li>
+			<li><a data-weight="2">Belēviča</a></li>
+			<li><a data-weight="2">bezmaksas</a></li>
+			<li><a data-weight="2">Prezidentūras</a></li>
+			<li><a data-weight="2">saņem</a></li>
+			<li><a data-weight="2">brašulis</a></li>
+			<li><a data-weight="2">lielais</a></li>
+			<li><a data-weight="2">šobrīd</a></li>
+			<li><a data-weight="2">donorus</a></li>
+			<li><a data-weight="2">integrācija</a></li>
+			<li><a data-weight="2">kristinekatrina</a></li>
+			<li><a data-weight="2">izglītības</a></li>
+			<li><a data-weight="2">pārdot</a></li>
+			<li><a data-weight="2">nesaņemam</a></li>
+			<li><a data-weight="2">saprast</a></li>
+			<li><a data-weight="2">valstij</a></li>
+			<li><a data-weight="2">zvani</a></li>
+			<li><a data-weight="2">Green</a></li>
+			<li><a data-weight="2">problēmu</a></li>
+			<li><a data-weight="2">fiksētā</a></li>
+			<li><a data-weight="2">goda</a></li>
+			<li><a data-weight="2">adresi</a></li>
+			<li><a data-weight="2">marruciic</a></li>
+			<li><a data-weight="2">jubilejas</a></li>
+			<li><a data-weight="2">Mammu</a></li>
+			<li><a data-weight="2">daudzi</a></li>
+			<li><a data-weight="2">Rīgā</a></li>
+			<li><a data-weight="2">treileru</a></li>
+			<li><a data-weight="2">sergejsu</a></li>
+			<li><a data-weight="2">https</a></li>
+			<li><a data-weight="2">norādīto</a></li>
+			<li><a data-weight="2">Cveigelis</a></li>
+			<li><a data-weight="2">laacz</a></li>
+			<li><a data-weight="2">Igauņi</a></li>
+			<li><a data-weight="2">varonis</a></li>
+			<li><a data-weight="2">vari</a></li>
+			<li><a data-weight="2">ves</a></li>
+			<li><a data-weight="2">regbijs</a></li>
+			<li><a data-weight="2">uzņēmumu</a></li>
+			<li><a data-weight="2">saņemt</a></li>
+			<li><a data-weight="2">procesā</a></li>
+			<li><a data-weight="2">vajadzību</a></li>
+			<li><a data-weight="2">realizēta</a></li>
+			<li><a data-weight="2">utopiski</a></li>
+			<li><a data-weight="2">kanālā</a></li>
+			<li><a data-weight="2">laikam</a></li>
+			<li><a data-weight="2">risinājumu</a></li>
+			<li><a data-weight="2">valodā</a></li>
+			<li><a data-weight="2">ltvpanorama</a></li>
+			<li><a data-weight="2">līgumu</a></li>
+			<li><a data-weight="2">Keris</a></li>
+			<li><a data-weight="2">eiro</a></li>
+			<li><a data-weight="2">pārbaudīsim</a></li>
+			<li><a data-weight="2">Lienes</a></li>
+			<li><a data-weight="2">raidījums</a></li>
+			<li><a data-weight="2">lielāka</a></li>
+			<li><a data-weight="2">īsta</a></li>
+		</ul>
+    </div>
+</body>
+</html>

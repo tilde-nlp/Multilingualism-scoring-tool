@@ -1,0 +1,30 @@
+To create offline sites, sites are crawled with wget, only html kept
+Large sites crawled only 3..5 hops deep, small sites crawled completely. 
+Sample crawls, one full, one 5 levels deep:
+
+wget --output-file=log.log -N --recursive --level=0 --wait=0.25 --show-progress --convert-links --adjust-extension --no-parent --directory-prefix=offline_sites https://luxexpress.eu/
+wget --output-file=log.log -N --recursive --level=5 --wait=0.25 --show-progress --convert-links --adjust-extension --no-parent --directory-prefix=offline_sites https://www.norden.org/
+
+exit /b 0
+
+Logging and input file:
+  -o,  --output-file=FILE          log messages to FILE
+Recursive download:
+  -r,  --recursive                 specify recursive download
+  -l,  --level=NUMBER              maximum recursion depth (inf or 0 for infinite)
+Download:
+  -N,  --timestamping              don't re-retrieve files unless newer than local
+  -w,  --wait=SECONDS              wait SECONDS between retrievals
+  -O,  --output-document=FILE      write documents to FILE
+       --show-progress             display the progress bar in any verbosity mode
+Directories:
+  -P,  --directory-prefix=PREFIX   save files to PREFIX/..
+HTTP options:
+  -E,  --adjust-extension          save HTML/CSS documents with proper extensions
+Recursive download:
+  -m,  --mirror                    shortcut for -N -r -l inf --no-remove-listing # THIS interferes with --level
+  -k,  --convert-links             make links in downloaded HTML or CSS point to
+                                     local files
+  -p,  --page-requisites           get all images, etc. needed to display HTML page
+Recursive accept/reject:
+  -np, --no-parent                 don't ascend to the parent directory
