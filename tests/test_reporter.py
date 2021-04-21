@@ -12,14 +12,14 @@ class TestReporter(unittest.TestCase):
     def test_non_existing_dir(self):
         reporter = Reporter("non_existing_dir")
         score = reporter.get_score("non_existing_file")
-        self.assertEqual(score, None)
+        self.assertEqual(score, 0)
 
     def test_non_existing_file(self):
         existing_dir = "test_dir"
         os.makedirs(existing_dir, exist_ok=True)
         reporter = Reporter(existing_dir)
         score = reporter.get_score("non.existing.domain")
-        self.assertEqual(score, None)
+        self.assertEqual(score, 0)
         shutil.rmtree(existing_dir)
 
     def test_simple(self):

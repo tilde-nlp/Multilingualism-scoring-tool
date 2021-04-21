@@ -1,15 +1,19 @@
 
 import scrapy
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import CrawlSpider, SitemapSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
-class ScoringSpider(CrawlSpider):
+class ScoringSpider(SitemapSpider, CrawlSpider):
     # https://docs.scrapy.org/en/latest/topics/spiders.html
+    # We need to crawl a site, CrawlSpider does that.
+    # We want to crawl sitemap.xml too. To do that we need SitemapSpider
+    # Alternative: https://stackoverflow.com/questions/26407631/combining-spiders-in-scrapy?rq=1
     name = "ScoringSpider"
     
     rules = (
         Rule(LinkExtractor(), callback='analyze_page', follow=True),
     )
+    sitemap_rules = [('.*', 'analyze_page')]
     analyzer=None
 
 

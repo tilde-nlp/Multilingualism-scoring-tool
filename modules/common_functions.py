@@ -43,15 +43,15 @@ def extractTextXPath(response):
     return text
 
 # justext
-# All paragraphs are bad...
-def extractTextJustext(response):
+# def extractTextJustext(response):
+def extractText(response):
     text_lines = []
     # paragraphs = justext.justext(response.content, justext.get_stoplist("English"))
-    print(len(response.text))
+    # print(len(response.text))
     # print("Stopwords: ", justext.get_stoplist("English"))
     paragraphs = justext.justext(response.text, frozenset(), stopwords_low=10,stopwords_high=0)
     for paragraph in paragraphs:
-        print("Paragraph {}; {}".format(paragraph.is_boilerplate, paragraph.text))
+        # print("Paragraph is boilerplate:{}; {}".format(paragraph.is_boilerplate, paragraph.text))
         if not paragraph.is_boilerplate:
             text_lines.append(paragraph.text)
     text = '\n'.join(text_lines)
@@ -60,9 +60,11 @@ def extractTextJustext(response):
 
 # https://github.com/adbar/trafilatura
 # Good F1 measure
-def extractText(response):
-    text = extract(response.text,'asks.for.url')
+def extractText_trafilatura(response):
+    text = extract(response.text, response.url)
     text = segmentText(text)
+    if text is None:
+        return ""
     return text
 
 # https://pypi.org/project/html-text/

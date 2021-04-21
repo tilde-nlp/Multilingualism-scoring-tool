@@ -58,7 +58,7 @@ class TestExtractDomain(unittest.TestCase):
 
 
 class TestExtractText(unittest.TestCase):
-    body = '''<!DOCTYPE html><html lang="lv"><head><title>Teksts latviešu valodā.</title></head><body><h1>Testa lapa teksta izvilkšanas un valodas noteikšanas pārbaudei.</h1><p>Daudz <b>vairāk</b> teksta latviešu valodā.</p><div><p>Some text inside a div element.</p><p>Very unimportant news from somesite.</p></div></body></html>'''
+    body = '''<!DOCTYPE html><html lang="lv"><head><title>Teksts latviešu valodā.</title></head><body><h1>Testa lapa teksta izvilkšanas un valodas noteikšanas pārbaudei.</h1><p>Daudz <b>vairāk</b> teksta latviešu valodā. Teksts ir mutvārdos izteikts vai rakstveidā fiksēts loģiski strukturēts, funkcionāli vienots jēdzieniski saistītu izteikumu kopums vai atsevišķs izteikums. Literatūrā teksts ir jebkurš objekts, ko var "lasīt", vai šis objekts ir literārais darbs, ielas apzīmējums, ēku izvietojums pilsētas blokā vai apģērbu stils. Tas ir saskaņots zīmju kopums, kas pārraida kādu informatīvu vēstījumu. Šis simbolu komplekts tiek uzskatīts par informatīvā ziņojuma saturu, nevis tā fizisko formu vai veidu, kurā tas ir attēlots.</p><div><p>Some text inside a div element.</p><p>Very unimportant news from somesite.</p></div></body></html>'''
     body = body.encode('utf-8')
     test_request = Request('http://dummy.url/')
     test_response = TextResponse('http://dummy.url/', status=200, body=body, request=test_request)

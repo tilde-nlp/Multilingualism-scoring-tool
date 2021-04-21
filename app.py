@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+from urllib.parse import urlparse
 import configparser
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
 import scrapy
@@ -28,8 +29,12 @@ def run_scoring(urls=None):
             # 'https://www.madaracosmetics.com',
             # 'https://www.airbaltic.com',
             # 'https://census.gov.uk/help/languages-and-accessibility/languages',
-            # 'http://quotes.toscrape.com/', # 47 links l2, mono
+
         ]
+    sitemap_urls = []
+    for url in urls:
+        parsed_url = urlparse(url)
+        sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
 
     allowed_domains = [extractDomain(i) for i in urls]
     # print(f'\nPrepared allowed_domains {allowed_domains}\n')
@@ -69,6 +74,7 @@ def run_scoring(urls=None):
 
     spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
     spider.start_urls = urls
+    spider.sitemap_urls = sitemap_urls
     spider.allowed_domains = allowed_domains 
     spider.analyzer = Analyzer(analyzer_data_dir)
 
@@ -78,8 +84,10 @@ def run_scoring(urls=None):
 
     reporter = Reporter(analyzer_data_dir)
     for domain in allowed_domains:
-        score = reporter.get_score(domain)
-        print(f"Domain: {domain}, score: {score}")
+        stats = reporter.get_stats(domain)
+        # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
+        score = reporter.get_score_from_stats(stats)
+        print("Domain: {}, score: {:0.3f}, langs: {}".format(domain, score, stats['langs']))
 
 
     print("Done crawling ")
