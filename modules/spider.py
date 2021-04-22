@@ -3,7 +3,7 @@ import scrapy
 from scrapy.spiders import CrawlSpider, SitemapSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
-class ScoringSpider(SitemapSpider, CrawlSpider):
+class ScoringSpider(CrawlSpider):
     # https://docs.scrapy.org/en/latest/topics/spiders.html
     # We need to crawl a site, CrawlSpider does that.
     # We want to crawl sitemap.xml too. To do that we need SitemapSpider
@@ -13,9 +13,7 @@ class ScoringSpider(SitemapSpider, CrawlSpider):
     rules = (
         Rule(LinkExtractor(), callback='analyze_page', follow=True),
     )
-    sitemap_rules = [('.*', 'analyze_page')]
     analyzer=None
-
 
     def analyze_page(self, response):
         # print(f"Existing settings: {self.settings.attributes.keys()}")
@@ -31,3 +29,11 @@ class ScoringSpider(SitemapSpider, CrawlSpider):
         #     yield scrapy.Request(response.urljoin(href), self.parse)
 
 
+class ScoringSpiderSitemap(SitemapSpider):
+    name = "ScoringSpiderSitemap"
+    
+    sitemap_rules = [('.*', 'analyze_page')]
+    analyzer=None
+
+    def analyze_page(self, response):
+        self.analyzer.analyze(response)

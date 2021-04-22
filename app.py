@@ -7,6 +7,7 @@ import configparser
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from modules.spider import ScoringSpider
+from modules.spider import ScoringSpiderSitemap
 from modules.analyzer import Analyzer
 from modules.reporter import Reporter
 from modules.common_functions import extractDomain
@@ -17,9 +18,9 @@ def run_scoring(urls=None):
     if urls == None:
         urls = [
             # 'https://www.bmw.com/',  # quite mulitlingual
-            'https://www.memorywater.com/', # 19 links l2, 3 langs 
+            # 'https://www.memorywater.com/', # 19 links l2, 3 langs 
             # 'https://www.tilde.lv/',    # mulitlingual .ee .lt
-            # 'http://gorny.edu.pl/', # 5 links l2, mono
+            'http://gorny.edu.pl/', # 5 links l2, mono
             # 'https://www.norden.org/',
             # 'https://europa.eu/',
             # 'https://globalvoices.org/',
@@ -27,7 +28,7 @@ def run_scoring(urls=None):
             # 'https://luxexpress.com',
             # 'https://aerodium.technology',
             # 'https://www.madaracosmetics.com',
-            # 'https://www.airbaltic.com',
+            'https://www.airbaltic.com',
             # 'https://census.gov.uk/help/languages-and-accessibility/languages',
 
         ]
@@ -35,6 +36,7 @@ def run_scoring(urls=None):
     for url in urls:
         parsed_url = urlparse(url)
         sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
+        sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt')
 
     allowed_domains = [extractDomain(i) for i in urls]
     # print(f'\nPrepared allowed_domains {allowed_domains}\n')
@@ -73,11 +75,16 @@ def run_scoring(urls=None):
     process = CrawlerProcess(settings=settings)
 
     spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
+    sitemapspider = ScoringSpiderSitemap
+
     spider.start_urls = urls
-    spider.sitemap_urls = sitemap_urls
     spider.allowed_domains = allowed_domains 
     spider.analyzer = Analyzer(analyzer_data_dir)
+    sitemapspider.sitemap_urls = sitemap_urls
+    sitemapspider.analyzer = spider.analyzer
 
+
+    process.crawl(sitemapspider)
     process.crawl(spider)
     process.start()
     # process.stop()
