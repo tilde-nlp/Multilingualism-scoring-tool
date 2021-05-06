@@ -19,92 +19,16 @@ from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 
 class ScoringTool():
-    # Control scrapy crawling, and Reporting 
-    # def initialize(self, urls):
-    #     print("Initializing ScoringTool class")
-    #     self.urls = urls
 
-    #     sitemap_urls = []
-    #     for url in urls:
-    #         parsed_url = urlparse(url)
-    #         sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
-    #         sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt')
-
-    #     # settings = {}
-    #     settings = get_project_settings()
-
-    #     config = configparser.ConfigParser()
-    #     config.read('settings.ini')
-    #     def override_default_crawler_config():
-    #         for key in config['crawler']:
-    #             settings[key.upper()] = config.get('crawler', key, fallback='')
-    #     override_default_crawler_config()
-
-    #     self.analyzer_data_dir = config.get('analyzer', 'data_dir', fallback='')
-    #     self.reporter = Reporter(self.analyzer_data_dir)
-    #     self.allowed_domains = [extractDomain(i) for i in urls]
-    #     # print(f'\nPrepared allowed_domains {allowed_domains}\n')
-
-    #     def dump_config_to_file_for_debug():
-    #         with open('settings.cfg', 'w', encoding='utf-8') as of:
-    #             for key, value in settings.items():
-    #                 of.write(f'{key}, {value}\n')
-    #     dump_config_to_file_for_debug()
-
-    #     def clear_log_file(): # Use new log file for each run
-    #         try:
-    #             os.remove(settings['LOG_FILE'])
-    #         except PermissionError:
-    #             pass
-    #         except FileNotFoundError:
-    #             pass
-    #     clear_log_file()
-
-    #     def clean_analyzed_dir_before_running():
-    #         try:
-    #             shutil.rmtree(self.analyzer_data_dir)
-    #         except Exception as e:
-    #             print("Exception "+str(e))
-    #             pass
-    #     clean_analyzed_dir_before_running()
-
-    #     # process = CrawlerProcess(settings=settings)
-    #     process = CrawlerRunner(settings=settings)
-        
-
-    #     spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
-    #     sitemapspider = ScoringSpiderSitemap
-
-    #     spider.start_urls = urls
-    #     spider.allowed_domains = self.allowed_domains 
-    #     spider.analyzer = Analyzer(self.analyzer_data_dir)
-    #     sitemapspider.allowed_domains = self.allowed_domains
-    #     sitemapspider.sitemap_urls = sitemap_urls
-    #     sitemapspider.analyzer = spider.analyzer
-
-    #     # process.crawl(sitemapspider)
-    #     # process.crawl(spider)
-    #     @defer.inlineCallbacks
-    #     def crawl():
-    #         yield process.crawl(sitemapspider)
-    #         yield process.crawl(spider)
-    #         print("Crawling in twisted done")
-    #         return self.get_current_stats()
-    #         # reactor.stop()
-    #     crawl()
-    #     print("Crawling() in twisted done")
-    #     reactor.run()
-    #     # process.start()
-    #     # process.stop()
-
-    #     for domain in self.allowed_domains:
-    #         stats = self.reporter.get_stats(domain)
-    #         # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
-    #         score = self.reporter.get_score_from_stats(stats)
-    #         print("Domain: {}, score: {:0.3f}, langs: {}".format(domain, score, stats['langs']))
-
-
-    #     return score    # returns last score for testing
+    def get_crawl_progress_status(self):
+        current_status = {}
+        if self.status is None:
+            current_status["status"] = "error" 
+            current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
+            return current_status
+        current_status["status"] = self.status
+        current_status["message"] = self.status
+        return current_status
 
     def get_current_stats(self):
         current_status = {}
@@ -147,23 +71,25 @@ class ScoringTool():
             yield process.crawl(sitemapspider)
             yield process.crawl(spider)
             print("Crawling in twisted done") # Actual crawl done
+            self.status = "crawling finished"
             # reactor.stop()
 
         crawl()
 
         # reactor.run()
         threading.Thread(target=reactor.run, args=(False,)).start()
+        self.status = "crawling"
 
         current_status = {}
-        current_status["status"] = "running" 
+        current_status["status"] = self.status 
         current_status["message"] = f"Started crawling of {len(spider.start_urls)} urls."
         return current_status
 
 
 
-    def initialize4thr(self, urls):
+    def initialize(self, urls):
         self.urls = urls
-
+        
         self.sitemap_urls = []
         for url in urls:
             parsed_url = urlparse(url)
@@ -207,3 +133,6 @@ class ScoringTool():
                 print("Exception "+str(e))
                 pass
         clean_analyzed_dir_before_running()
+
+        if self.status is None:
+            self.status = "initialized"

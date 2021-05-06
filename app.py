@@ -24,42 +24,14 @@ class ScoringHandler(tornado.web.RequestHandler):
         self.scorer = scorer
 
     def get(self):
-        # API v.1
-        #     start_crawl(urls, settings={hopi,})
-        #         starts crawling of urls using settings
-        #         returns "Started crawling of {len(urls)} urls."
-        #     get_crawl_progress_status()
-        #         ? return current depth of crawling for each url ?
-        #     get_current_scores()
-        #         returns statistics&scores at this moment
-        #     stop_crawl()
-        #         stops crawling and returns get_current_scores()
-        q = self.get_query_argument("q", "", False)
-        print("GET")
-        if q == "start_crawl":
-            urls = self.get_body_argument("urls", default=None, strip=False)
-            hops = self.get_body_argument("hops", default=None, strip=False)
-            urls = urls.split(",")
-            hops = int(hops)
-            print(f"Urls: {urls}")
-            print(f"hops: {hops}")
+        # present form
+        self.write("""<html>
+<title>Web form</title>
 
-            self.scorer.initialize4thr(urls)
-            response = self.scorer.do_crawling_in_separate_thread()
-            self.write(json.dumps(f"Started crawling of {len(urls)} urls.", indent=2, ensure_ascii=False))
-        elif q == "get_crawl_progress_status":
-            response = self.scorer.get_current_stats()
-            self.write(json.dumps(response, indent=2, ensure_ascii=False))
-        elif q == "get_current_scores":
-            response = self.scorer.get_current_stats()
-            self.write(json.dumps(response, indent=2, ensure_ascii=False))
-        elif q == "stop_crawl":
-            pass
-        elif q == "quit":
-            self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
-            print("Exiting")
-            reactor.stop()
-            sys.exit()
+<body>Web form will be here</body>
+
+</html>""")
+        pass
 
     def post(self):
         # API v.1
@@ -79,15 +51,13 @@ class ScoringHandler(tornado.web.RequestHandler):
             hops = self.get_body_argument("hops", default=None, strip=False)
             urls = urls.split(",")
             hops = int(hops)
-            print(f"Urls: {urls}")
-            print(f"hops: {hops}")
 
-            self.scorer.initialize4thr(urls)
+            self.scorer.initialize(urls)
             response = self.scorer.do_crawling_in_separate_thread()
             # Status message, about crawling started
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_crawl_progress_status":
-            response = self.scorer.get_current_stats()
+            response = self.scorer.get_crawl_progress_status()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_current_scores":
             response = self.scorer.get_current_stats()
@@ -115,7 +85,7 @@ def do_stop():
 
 def run_scoring_web():
     PORT = '8989'
-    ADDRESS = '127.0.0.127'
+    # ADDRESS = '127.0.0.127'
 
     scorer = ScoringTool()
     app = make_app(scorer)
