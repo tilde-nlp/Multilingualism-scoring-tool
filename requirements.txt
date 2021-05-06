@@ -1,0 +1,10 @@
+#python=3.9.4
+setuptools_rust
+Scrapy==2.5.0
+tldextract==3.1.0
+jusText==2.2.0
+trafilatura==0.8.2
+html_text==0.5.2
+langdetect==1.0.8
+
+tornado==6.1
