@@ -150,22 +150,15 @@ class ScoringTool():
             # reactor.stop()
 
         crawl()
-        print("Crawling() in twisted done")
 
         # reactor.run()
         threading.Thread(target=reactor.run, args=(False,)).start()
 
-        # process.start()
-        # process.stop()
+        current_status = {}
+        current_status["status"] = "running" 
+        current_status["message"] = f"Started crawling of {len(urls)} urls."
+        return current_status
 
-        # for domain in self.allowed_domains:
-        #     stats = self.reporter.get_stats(domain)
-        #     # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
-        #     score = self.reporter.get_score_from_stats(stats)
-        #     print("Domain: {}, score: {:0.3f}, langs: {}".format(domain, score, stats['langs']))
-
-
-        # return score    # returns last score for testing
 
 
     def initialize4thr(self, urls):

@@ -84,7 +84,8 @@ class ScoringHandler(tornado.web.RequestHandler):
 
             self.scorer.initialize4thr(urls)
             response = self.scorer.do_crawling_in_separate_thread()
-            self.write(json.dumps(f"Started crawling of {len(urls)} urls.", indent=2, ensure_ascii=False))
+            # Status message, about crawling started
+            self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_crawl_progress_status":
             response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
