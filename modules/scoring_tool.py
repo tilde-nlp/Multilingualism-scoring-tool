@@ -156,7 +156,7 @@ class ScoringTool():
 
         current_status = {}
         current_status["status"] = "running" 
-        current_status["message"] = f"Started crawling of {len(urls)} urls."
+        current_status["message"] = f"Started crawling of {len(spider.start_urls)} urls."
         return current_status
 
 
