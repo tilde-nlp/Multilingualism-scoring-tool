@@ -107,11 +107,14 @@ class ScoringTool():
     #     return score    # returns last score for testing
 
     def get_current_stats(self):
+        current_status = {}
         try: 
             allowed_domains = self.allowed_domains
         except AttributeError:
-            return "No stats - nothing to analyze. Maybe scoring tool not yet initialized"
-        current_status = {}
+            current_status["status"] = "error" 
+            current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
+            return current_status
+
         for domain in self.allowed_domains:
             stats = self.reporter.get_stats(domain)
             # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter

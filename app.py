@@ -23,6 +23,44 @@ class ScoringHandler(tornado.web.RequestHandler):
     def initialize(self, scorer):
         self.scorer = scorer
 
+    def get(self):
+        # API v.1
+        #     start_crawl(urls, settings={hopi,})
+        #         starts crawling of urls using settings
+        #         returns "Started crawling of {len(urls)} urls."
+        #     get_crawl_progress_status()
+        #         ? return current depth of crawling for each url ?
+        #     get_current_scores()
+        #         returns statistics&scores at this moment
+        #     stop_crawl()
+        #         stops crawling and returns get_current_scores()
+        q = self.get_query_argument("q", "", False)
+        print("GET")
+        if q == "start_crawl":
+            urls = self.get_body_argument("urls", default=None, strip=False)
+            hops = self.get_body_argument("hops", default=None, strip=False)
+            urls = urls.split(",")
+            hops = int(hops)
+            print(f"Urls: {urls}")
+            print(f"hops: {hops}")
+
+            self.scorer.initialize4thr(urls)
+            response = self.scorer.do_crawling_in_separate_thread()
+            self.write(json.dumps(f"Started crawling of {len(urls)} urls.", indent=2, ensure_ascii=False))
+        elif q == "get_crawl_progress_status":
+            response = self.scorer.get_current_stats()
+            self.write(json.dumps(response, indent=2, ensure_ascii=False))
+        elif q == "get_current_scores":
+            response = self.scorer.get_current_stats()
+            self.write(json.dumps(response, indent=2, ensure_ascii=False))
+        elif q == "stop_crawl":
+            pass
+        elif q == "quit":
+            self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
+            print("Exiting")
+            reactor.stop()
+            sys.exit()
+
     def post(self):
         # API v.1
         #     start_crawl(urls, settings={hopi,})
@@ -35,6 +73,7 @@ class ScoringHandler(tornado.web.RequestHandler):
         #     stop_crawl()
         #         stops crawling and returns get_current_scores()
         q = self.get_query_argument("q", "", False)
+        print("POST")
         if q == "start_crawl":
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
@@ -80,9 +119,11 @@ def run_scoring_web():
     scorer = ScoringTool()
     app = make_app(scorer)
 
-    app.listen(PORT, address = ADDRESS)
+    # app.listen(PORT, address = ADDRESS)
+    app.listen(PORT)
     signal.signal(signal.SIGINT, sig_exit)
-    print(f"Server started on {ADDRESS}:{PORT}!")
+    # print(f"Server started on {ADDRESS}:{PORT}!")
+    print(f"Server started on {PORT} port!")
     tornado.ioloop.IOLoop.current().start()
 
 
@@ -117,6 +158,7 @@ if __name__ == "__main__":
     # import argparse
     # parser = argparse.ArgumentParser(description='This is tool for evaluation of website multilinguality!')
     # parser.add_argument('-u', '--urls', nargs='+', help='Starting urls to evaluate, domains will be extracted from them.')
+    # parser.add_argument('-p', '--port', default='8989', help='port.')
     # args = parser.parse_args()
     # urls = args.urls
     # run_scoring(urls)
