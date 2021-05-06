@@ -22,12 +22,12 @@ class ScoringTool():
 
     def get_crawl_progress_status(self):
         current_status = {}
-        if self.status is None:
+        try:
+            current_status["status"] = self.status
+            current_status["message"] = self.status
+        except AttributeError:
             current_status["status"] = "error" 
             current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
-            return current_status
-        current_status["status"] = self.status
-        current_status["message"] = self.status
         return current_status
 
     def get_current_stats(self):
@@ -134,5 +134,4 @@ class ScoringTool():
                 pass
         clean_analyzed_dir_before_running()
 
-        if self.status is None:
-            self.status = "initialized"
+        self.status = "initialized"

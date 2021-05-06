@@ -45,7 +45,7 @@ class ScoringHandler(tornado.web.RequestHandler):
         #     stop_crawl()
         #         stops crawling and returns get_current_scores()
         q = self.get_query_argument("q", "", False)
-        print("POST")
+
         if q == "start_crawl":
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
