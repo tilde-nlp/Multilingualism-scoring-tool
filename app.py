@@ -29,14 +29,10 @@ class ScoringHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET')
 
     def get(self):
-        # present form
-        self.write("""<html>
-<title>Web form</title>
+        with open("index.html", "r", encoding='utf-8') as htmlf:
+            html = htmlf.read()
+        self.write(html)
 
-<body>Web form will be here</body>
-
-</html>""")
-        pass
 
     def post(self):
         # API v.1

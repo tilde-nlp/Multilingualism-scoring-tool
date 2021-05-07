@@ -20,26 +20,6 @@ from scrapy.utils.project import get_project_settings
 
 class ScoringTool():
 
-    def __init__(self):
-        # settings = {}
-        self.settings = get_project_settings()        
-
-        self.config = configparser.ConfigParser()
-        self.config.read('settings.ini')
-        def override_default_crawler_config():
-            for key in self.config['crawler']:
-                self.settings[key.upper()] = self.config.get('crawler', key, fallback='')
-        override_default_crawler_config()
-        def clear_log_file(): # Use new log file for each run
-            try:
-                os.remove(self.settings['LOG_FILE'])
-            except PermissionError:
-                pass
-            except FileNotFoundError:
-                pass
-        clear_log_file()
-
-
     def get_crawl_progress_status(self):
         current_status = {}
         try:
@@ -49,7 +29,6 @@ class ScoringTool():
             current_status["status"] = "error" 
             current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
         return current_status
-
 
     def get_current_stats(self):
         current_status = {}
@@ -72,17 +51,26 @@ class ScoringTool():
 
     def start_crawl(self, urls, hops):
         self.urls = urls
-        
+
         self.sitemap_urls = []
         for url in urls:
             parsed_url = urlparse(url)
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt')
 
+        # settings = {}
+        self.settings = get_project_settings()
+
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        def override_default_crawler_config():
+            for key in config['crawler']:
+                self.settings[key.upper()] = config.get('crawler', key, fallback='')
+        override_default_crawler_config()
         # override DEPTH_LIMIT with "hops" from UI
         self.settings['DEPTH_LIMIT'] = hops
 
-        self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
+        self.analyzer_data_dir = config.get('analyzer', 'data_dir', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir)
         self.allowed_domains = [extractDomain(i) for i in urls]
         # print(f'\nPrepared allowed_domains {allowed_domains}\n')
@@ -93,6 +81,15 @@ class ScoringTool():
                     of.write(f'{key}, {value}\n')
         dump_config_to_file_for_debug()
 
+        def clear_log_file(): # Use new log file for each run
+            try:
+                os.remove(self.settings['LOG_FILE'])
+            except PermissionError:
+                pass
+            except FileNotFoundError:
+                pass
+        clear_log_file()
+
         def clean_analyzed_dir_before_running():
             try:
                 shutil.rmtree(self.analyzer_data_dir)
@@ -101,15 +98,13 @@ class ScoringTool():
                 pass
         clean_analyzed_dir_before_running()
 
-        # Run twisted reactor in separate thread
-        threading.Thread(target=reactor.run, args=(False,)).start()
-
         self.status = "initialized"
 
         # https://stackoverflow.com/questions/14274916/execute-twisted-reactor-run-in-a-thread/14282640
         # process = CrawlerProcess(settings=settings)
         self.process = CrawlerRunner(settings=self.settings)
         
+
         spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
         sitemapspider = ScoringSpiderSitemap
 
@@ -133,7 +128,7 @@ class ScoringTool():
         crawl()
 
         # reactor.run()
-        # threading.Thread(target=reactor.run, args=(False,)).start()
+        threading.Thread(target=reactor.run, args=(False,)).start()
 
         self.status = "crawling"
 

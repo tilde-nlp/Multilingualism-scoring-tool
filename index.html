@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-adreal-did="1620292041587186"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.80.0">
+    <title>Multilingualism tool</title>
+
+
+    
+
+    <!-- Bootstrap core CSS -->
+<!-- <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+<meta name="theme-color" content="#563d7c">
+
+<style>
+    #start-crawling {
+      background-color: #A41E43;
+      border: 1px solid #A41E43;
+    }
+
+    .crawling-data__wrapper .strong {
+      font-weight: 600;
+    }
+
+    .status-alert {
+      display: none;
+    }
+
+    .crawling-stats {
+      display: none;
+    }
+</style>
+
+</head>
+  <body class="bg-light">
+    
+<div class="container">
+  <div class="py-5 text-center">
+    <img class="d-block mx-auto mb-4" src="https://tilde.com/themes/custom/drupal8_zymphonies_theme/logo.svg" alt="" width="72" height="72">
+    <h2>Multilingualism tool</h2>
+    <p class="lead">Below is a multilinguality tool.</p>
+  </div>
+
+  <div class="row crawling-data">
+
+    <div class="col-md-8 offset-2">
+      <div class="alert alert-secondary justify-content-between align-items-center status-alert" role="alert">
+        Crawling is ongoing.
+        <a href="#" class="mr-2 refresh-stats" type="submit">Refresh</a>
+        <a  href="#" class="stop-crawl" type="submit">Stop</a>
+      </div>
+
+      <div class="alert alert-secondary justify-content-between align-items-center done-alert" role="alert">
+        Crawling finished.
+       </div>
+
+      <h4 class="mb-3">Crawling data</h4>
+      <form class="needs-validation" novalidate="">
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">Urls (comma separated):</label>
+              <textarea class="form-control" id="urlsToCrawl" rows="5"></textarea>
+            </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label for="zip">Hops:</label>
+            <input type="number" value="1" class="form-control" min="0" max="999" id="hops" placeholder="0" required="">
+          </div>
+        </div>
+
+        
+        <hr class="mb-4">
+        <button class="btn btn-primary btn-lg btn-block" id="start-crawling" type="submit">Start crawling</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="row crawling-stats">
+    <div class="col-md-8 offset-2">
+      <h4 class="mb-5 mt-5">Current crawl data</h4>
+
+      <table class="table table-sm crawling-data">
+        <thead>
+          <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Language balance</th>
+            <th scope="col">Language count</th>
+            <th scope="col">Languages</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">© 2021 Tilde</p>
+    <!-- <ul class="list-inline">
+      <li class="list-inline-item"><a href="#">Privacy</a></li>
+      <li class="list-inline-item"><a href="#">Terms</a></li>
+      <li class="list-inline-item"><a href="#">Support</a></li>
+    </ul> -->
+  </footer>
+</div>
+
+
+<script
+src="https://code.jquery.com/jquery-3.6.0.min.js"
+integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+crossorigin="anonymous"></script>
+      <script>window.jQuery || document.write('<script src="/docs/4.6/assets/js/vendor/jquery.min.js"><\/script>')</script>
+      <!-- <script src="bootstrap/js/bootstrap.bundle.min.js"></script> -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+
+      <script>
+              $(document).ready(function() {
+                var crawling_in_progress = 0;
+                var serverUrl = "http://127.0.0.127:8989";
+
+                  var get_crawl_progress_status = function(){
+                    const url = serverUrl + "/score?q=get_crawl_progress_status";
+                      $.ajax({
+                            type: "POST",
+                            url: url,
+                            // data: {urls: urlsToCrawl, hops: hops},
+                            success: ((res)=>{
+                              res = JSON.parse(res);
+                              if (res.status === "error") {
+                                crawling_in_progress = 0;
+                                $(".status-alert").hide();
+                                $(".done-alert").hide();
+                              } else if(res.status === "crawling finished") {
+                                  // crawling finished
+                                  $(".status-alert").hide();
+                                  $(".done-alert").show();
+                                  crawling_in_progress = 0;
+                              } else {
+                                crawling_in_progress = 1;
+                                $(".status-alert").show();
+                                $(".done-alert").hide();
+                              }
+                            })
+                      });
+                  };
+
+                  get_crawl_progress_status();
+
+                    $("#start-crawling").on("click", ((event)=>{
+                      event.preventDefault();
+                      const url = serverUrl + "/score?q=start_crawl";
+                      const urlsToCrawl = $("#urlsToCrawl").val();
+                      const hops = $("#hops").val();
+                      $.ajax({
+                              type: "POST",
+                              url: url,
+                              data: {urls: urlsToCrawl, hops: hops},
+                              success: ((res)=>{
+                                get_crawl_progress_status();
+                              })
+                            });
+
+                    }));
+
+                    $(".stop-crawl").on("click", ((event)=>{
+                      event.preventDefault();
+                      const url = serverUrl + "/score?q=stop_crawl";
+                      $.ajax({
+                              type: "POST",
+                              url: url,
+                              data: {urls: urlsToCrawl, hops: hops},
+                              success: ((res)=>{
+                                get_crawl_progress_status();
+                              })
+                            });
+
+                    }));
+
+
+                    $(".refresh-stats").on("click", ((event)=>{
+                      event.preventDefault();
+                      const url = serverUrl + "/score?q=get_current_scores";
+
+                        $.ajax({
+                              type: "POST",
+                              url: url,
+                              success: ((res)=>{
+                                res = JSON.parse(res);
+                                if(res.status !== "error") {
+                                  let resultPages = [];
+                                  for (const [key, value] of Object.entries(res)) {
+                                    const tempPage = [key, ...res[key]];
+                                    resultPages.push(tempPage);
+                                  }
+                                  // create table and show stats
+                                  let dataTable = "";
+                                  resultPages.forEach((dataRow)=>{
+                                    let tablerow = "<tr>";
+                                    tablerow += "<th scope='row'>"+dataRow[0]+"</th>";
+                                    tablerow += "<td>"+dataRow[1]+"</td>";
+                                    tablerow += "<td>"+dataRow[2].lang_count+"</td>";
+                                    tablerow += "<td>";
+                                      tablerow +=  JSON.stringify(dataRow[2].langs);
+                                      tablerow += "</td>";
+                                      // <span>None:</span> <span>255</span><br>
+                                      //               <span>en:</span> <span>123</span>
+
+                                    
+                                    tablerow += "</tr>";
+
+                                    dataTable += tablerow;
+                                  });
+
+                                  $(".crawling-data tbody").html("");
+
+                                  $(".crawling-data tbody").append(dataTable);
+
+                                  get_crawl_progress_status();
+                                  $(".crawling-stats").show();
+                                } else {
+                                  // scoring tool not running
+                                  $(".crawling-stats").hide();
+                                }
+                              })
+                            });
+
+                    }));
+              });
+
+      </script>
+        
+  </body></html>
