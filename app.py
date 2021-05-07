@@ -52,7 +52,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             urls = urls.split(",")
             hops = int(hops)
 
-            self.scorer.initialize(urls)
+            self.scorer.initialize(urls, hops)
             response = self.scorer.do_crawling_in_separate_thread()
             # Status message, about crawling started
             self.write(json.dumps(response, indent=2, ensure_ascii=False))

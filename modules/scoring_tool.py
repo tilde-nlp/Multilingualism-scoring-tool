@@ -87,7 +87,7 @@ class ScoringTool():
 
 
 
-    def initialize(self, urls):
+    def initialize(self, urls, hops):
         self.urls = urls
         
         self.sitemap_urls = []
@@ -105,6 +105,8 @@ class ScoringTool():
             for key in config['crawler']:
                 self.settings[key.upper()] = config.get('crawler', key, fallback='')
         override_default_crawler_config()
+        # override DEPTH_LIMIT with "hops" from UI
+        self.settings['DEPTH_LIMIT'] = hops
 
         self.analyzer_data_dir = config.get('analyzer', 'data_dir', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir)
