@@ -23,6 +23,11 @@ class ScoringHandler(tornado.web.RequestHandler):
     def initialize(self, scorer):
         self.scorer = scorer
 
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET')
+
     def get(self):
         # present form
         self.write("""<html>
@@ -52,8 +57,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             urls = urls.split(",")
             hops = int(hops)
 
-            self.scorer.initialize(urls, hops)
-            response = self.scorer.do_crawling_in_separate_thread()
+            response = self.scorer.start_crawl(urls, hops)
             # Status message, about crawling started
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_crawl_progress_status":
@@ -63,7 +67,8 @@ class ScoringHandler(tornado.web.RequestHandler):
             response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "stop_crawl":
-            pass
+            response = self.scorer.stop_crawl()
+            self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "quit":
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
             print("Exiting")
