@@ -50,7 +50,7 @@ class ScoringHandler(tornado.web.RequestHandler):
         if q == "start_crawl":
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
-            urls = urls.split(",")
+            urls = urls.split("\n")
             hops = int(hops)
 
             response = self.scorer.start_crawl(urls, hops)
