@@ -33,6 +33,10 @@
     .crawling-stats {
       display: none;
     }
+
+    .inline-logo {
+      height: 30px;
+    }
 </style>
 
 </head>
@@ -40,9 +44,9 @@
     
 <div class="container">
   <div class="py-5 text-center">
-    <img class="d-block mx-auto mb-4" src="https://tilde.com/themes/custom/drupal8_zymphonies_theme/logo.svg" alt="" width="72" height="72">
+    <img class="d-block mx-auto mb-4" src="elrc.png" alt="" width="72" height="72">
     <h2>Multilingualism tool</h2>
-    <p class="lead">Below is a multilinguality tool.</p>
+    <p class="lead">Below is a multilinguality tool developed by Tilde. <img class="inline-logo" src="https://tilde.com/themes/custom/drupal8_zymphonies_theme/logo.svg" alt=""> </p>
   </div>
 
   <div class="row crawling-data">
@@ -92,7 +96,7 @@
       <table class="table table-sm crawling-data">
         <thead>
           <tr>
-            <th scope="col">Title</th>
+            <th scope="col">Url</th>
             <th scope="col">Language balance</th>
             <th scope="col">Language count</th>
             <th scope="col">Languages</th>
@@ -145,8 +149,12 @@ crossorigin="anonymous"></script>
                               } else if(res.status === "ready") {
                                   // crawling finished
                                   $(".status-alert").hide();
-                                  $(".done-alert").show();
+                                  $(".done-alert").hide();
                                   crawling_in_progress = 0;
+                              } else if(res.status === "stopping") {
+                                  $(".status-alert").hide();
+                                  $(".done-alert").hide();
+                                  crawling_in_progress = 1;
                               } else {
                                 crawling_in_progress = 1;
                                 $(".status-alert").show();
