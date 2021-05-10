@@ -180,7 +180,6 @@ crossorigin="anonymous"></script>
                       $.ajax({
                               type: "POST",
                               url: url,
-                              data: {urls: urlsToCrawl, hops: hops},
                               success: ((res)=>{
                                 get_crawl_progress_status();
                               })
