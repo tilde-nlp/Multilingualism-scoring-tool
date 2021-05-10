@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 import threading
+import logging
 
 from urllib.parse import urlparse
 import configparser
@@ -19,6 +20,28 @@ from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 
 class ScoringTool():
+    def __init__(self):
+        self.logger = logging.getLogger("ScoringTool")
+        
+        # settings = {}
+        self.settings = get_project_settings()        
+
+        self.config = configparser.ConfigParser()
+        self.config.read('settings.ini')
+        def override_default_crawler_config():
+            for key in self.config['crawler']:
+                self.settings[key.upper()] = self.config.get('crawler', key, fallback='')
+        override_default_crawler_config()
+        def clear_log_file(): # Use new log file for each run
+            try:
+                os.remove(self.settings['LOG_FILE'])
+            except PermissionError:
+                pass
+            except FileNotFoundError:
+                pass
+        clear_log_file()
+        self.status = "ready" # ready, error, crawling finished, crawling
+
 
     def get_crawl_progress_status(self):
         current_status = {}
@@ -40,16 +63,27 @@ class ScoringTool():
             return current_status
 
         for domain in self.allowed_domains:
-            stats = self.reporter.get_stats(domain)
+            try:
+                stats = self.reporter.get_stats(domain)
+            except Exception as e:
+                self.logger.error(f"{e}")
             # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
             score = self.reporter.get_score_from_stats(stats)
-            print("Domain: {}, score: {:0.3f}, langs: {}".format(domain, score, stats['langs']))
+            score = score * 100
+            score = "{:0.2f}".format(score)
+            print("Domain: {}, score: {}, langs: {}".format(domain, score, stats['langs']))
             current_status[domain] = (score, stats)
         # return (score, stats)
         return current_status
     
 
     def start_crawl(self, urls, hops):
+        if self.status == "crawling":
+            current_status = {}
+            current_status["status"] = "error" 
+            current_status["message"] = "Can not start, already crawling."
+            return current_status
+            
         self.urls = urls
 
         self.sitemap_urls = []
@@ -58,19 +92,11 @@ class ScoringTool():
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt')
 
-        # settings = {}
-        self.settings = get_project_settings()
 
-        config = configparser.ConfigParser()
-        config.read('settings.ini')
-        def override_default_crawler_config():
-            for key in config['crawler']:
-                self.settings[key.upper()] = config.get('crawler', key, fallback='')
-        override_default_crawler_config()
         # override DEPTH_LIMIT with "hops" from UI
         self.settings['DEPTH_LIMIT'] = hops
 
-        self.analyzer_data_dir = config.get('analyzer', 'data_dir', fallback='')
+        self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir)
         self.allowed_domains = [extractDomain(i) for i in urls]
         # print(f'\nPrepared allowed_domains {allowed_domains}\n')
@@ -81,14 +107,14 @@ class ScoringTool():
                     of.write(f'{key}, {value}\n')
         dump_config_to_file_for_debug()
 
-        def clear_log_file(): # Use new log file for each run
-            try:
-                os.remove(self.settings['LOG_FILE'])
-            except PermissionError:
-                pass
-            except FileNotFoundError:
-                pass
-        clear_log_file()
+        # def clear_log_file(): # Use new log file for each run
+        #     try:
+        #         os.remove(self.settings['LOG_FILE'])
+        #     except PermissionError:
+        #         pass
+        #     except FileNotFoundError:
+        #         pass
+        # clear_log_file()
 
         def clean_analyzed_dir_before_running():
             try:
@@ -98,7 +124,7 @@ class ScoringTool():
                 pass
         clean_analyzed_dir_before_running()
 
-        self.status = "initialized"
+        self.status = "ready"
 
         # https://stackoverflow.com/questions/14274916/execute-twisted-reactor-run-in-a-thread/14282640
         # process = CrawlerProcess(settings=settings)
@@ -115,20 +141,23 @@ class ScoringTool():
         sitemapspider.sitemap_urls = self.sitemap_urls
         sitemapspider.analyzer = spider.analyzer
 
-        # process.crawl(sitemapspider)
-        # process.crawl(spider)
         @defer.inlineCallbacks
         def crawl():
+            self.logger.debug(f"Crawling in twisted started.")
             yield self.process.crawl(sitemapspider)
             yield self.process.crawl(spider)
-            print("Crawling in twisted done") # Actual crawl done
-            self.status = "crawling finished"
+            # Actual crawl done
+            print("Crawling in twisted done") 
+            self.logger.debug(f"Crawling in twisted done.")
+            self.status = "ready"
             # reactor.stop()
 
         crawl()
 
         # reactor.run()
-        threading.Thread(target=reactor.run, args=(False,)).start()
+        # threading.Thread(target=reactor.run, args=(False,)).start()
+        if not reactor.running:
+            threading.Thread(target=reactor.run, args=(False,)).start()
 
         self.status = "crawling"
 
@@ -139,6 +168,7 @@ class ScoringTool():
 
 
     def stop_crawl(self):
+        print("Stop command received")
         try:
             self.process.stop()
         except Exception as e:

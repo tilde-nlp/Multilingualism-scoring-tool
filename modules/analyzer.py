@@ -45,6 +45,8 @@ class Analyzer():
         domain = extractDomain(url)
         filename = domain.replace(".","_")
 
+        total_words = len(plaintext.split())
+
         outfilename = os.path.join(self.data_dir, filename + ".txt")
         with open(outfilename, 'a', encoding="utf-8") as outf:
             outf.write('\n\n==========================================\n')
@@ -54,4 +56,4 @@ class Analyzer():
 
         outfilename = os.path.join(self.data_dir, filename + ".tsv")
         with open(outfilename, 'a', encoding="utf-8") as outf:
-            outf.write("{}\t{}\t{}\t{}\t{}\n".format(time_now, url, html_language, detected_main_language, current_depth))
+            outf.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(time_now, url, html_language, detected_main_language, current_depth, total_words))
