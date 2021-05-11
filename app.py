@@ -74,6 +74,9 @@ class ScoringHandler(tornado.web.RequestHandler):
 def make_app(scorer):
     return tornado.web.Application([
         (r"/score", ScoringHandler, {"scorer": scorer}),
+        (r"/images/(.*)", tornado.web.StaticFileHandler, {
+            "path": "./images/"
+        }),
     ])
 
 def sig_exit(signum, frame):
