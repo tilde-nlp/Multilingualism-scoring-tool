@@ -51,7 +51,7 @@
 
   <div class="row crawling-data">
 
-    <div class="col-md-8 offset-2">
+    <div class="col-md-10 offset-1">
       <div class="alert alert-secondary justify-content-between align-items-center status-alert" role="alert">
         Crawling is ongoing.
         <a href="#" class="mr-2 refresh-stats" type="submit">Refresh</a>
@@ -90,7 +90,7 @@
   </div>
 
   <div class="row crawling-stats">
-    <div class="col-md-8 offset-2">
+    <div class="col-md-10 offset-1">
       <h4 class="mb-5 mt-5">Current crawl data</h4>
 
       <table class="table table-sm crawling-data">
@@ -100,6 +100,11 @@
             <th scope="col">Language balance</th>
             <th scope="col">Language count</th>
             <th scope="col">Languages</th>
+            <th scope="col">Words per language</th>
+            <th scope="col">Total pages</th>
+            <th scope="col">Total words</th>
+            <th scope="col">Pages w/o language</th>
+            <th scope="col">Words in pages w/o language</th>
           </tr>
         </thead>
         <tbody>
@@ -224,6 +229,21 @@ crossorigin="anonymous"></script>
                                       }
                                       tablerow += "</td>";
                                     
+                                      tablerow += "<td>"
+                                        
+                                        // if (dataRow[2].langs_words) {
+                                          for (const [key, value] of Object.entries(dataRow[2].langs_words)) {
+                                        tablerow += "<span>"+key+":</span> <span>"+value+"</span><br>";
+                                      }
+                                        // }
+                                       
+                                        
+                                        
+                                        tablerow += "</td>";
+                                      tablerow += "<td>"+dataRow[2].total_pages+"</td>";
+                                      tablerow += "<td>"+dataRow[2].total_words+"</td>";
+                                      tablerow += "<td>"+dataRow[2].wo_lang_pages+"</td>";
+                                      tablerow += "<td>"+dataRow[2].wo_lang_words+"</td>";
                                     tablerow += "</tr>";
 
                                     dataTable += tablerow;
