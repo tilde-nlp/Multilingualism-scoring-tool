@@ -1,14 +1,15 @@
 import os
 import shutil
 import sys
-import threading
+# import threading
 import logging
+import time
 
 from urllib.parse import urlparse
 import configparser
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
 import scrapy
-from scrapy.crawler import CrawlerProcess, CrawlerRunner
+from scrapy.crawler import CrawlerProcess, CrawlerRunner, Crawler
 from modules.spider import ScoringSpider
 from modules.spider import ScoringSpiderSitemap
 from modules.analyzer import Analyzer
@@ -18,6 +19,9 @@ from modules.common_functions import extractDomain
 from twisted.internet import reactor, defer
 
 from scrapy.utils.project import get_project_settings
+
+from multiprocessing import Process
+
 
 class ScoringTool():
     def __init__(self, config):
@@ -32,9 +36,21 @@ class ScoringTool():
                 self.settings[key.upper()] = self.config.get('crawler', key, fallback='')
         override_default_crawler_config()
         self.status = "ready" # ready, crawling, stopping, error 
+        self.p = None
 
 
     def get_crawl_progress_status(self):
+        try:
+            crawlers = self.process.crawlers
+            if len(crawlers) > 0 and self.status=="stopping":
+                self.status = "stopping"
+            elif len(crawlers) > 0:
+                self.status = "crawling"
+            else:
+                self.status = "ready"
+        except Exception as e:
+            print(e)
+
         current_status = {}
         try:
             current_status["status"] = self.status
@@ -43,6 +59,7 @@ class ScoringTool():
             current_status["status"] = "error" 
             current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
         return current_status
+
 
     def get_current_stats(self):
         current_status = {}
@@ -69,7 +86,7 @@ class ScoringTool():
     
 
     def start_crawl(self, urls, hops):
-        if self.status != "ready":
+        if self.status in ["crawling", "stopping"]:
             current_status = {}
             current_status["status"] = "error" 
             current_status["message"] = "Can not start, already crawling."
@@ -106,39 +123,56 @@ class ScoringTool():
                 pass
         clean_analyzed_dir_before_running()
 
-        # https://stackoverflow.com/questions/14274916/execute-twisted-reactor-run-in-a-thread/14282640
-        # process = CrawlerProcess(settings=settings)
-        self.process = CrawlerRunner(settings=self.settings)
-        
-
+        # Define spider(s)
         spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
         sitemapspider = ScoringSpiderSitemap
-
         spider.start_urls = self.urls
         spider.allowed_domains = self.allowed_domains 
         spider.analyzer = Analyzer(self.analyzer_data_dir)
         sitemapspider.allowed_domains = self.allowed_domains
         sitemapspider.sitemap_urls = self.sitemap_urls
-        sitemapspider.analyzer = spider.analyzer
+        sitemapspider.analyzer = spider.analyzer    # the same as spider
 
-        @defer.inlineCallbacks
-        def crawl():
-            self.logger.debug(f"Crawling in twisted started.")
-            yield self.process.crawl(sitemapspider)
-            yield self.process.crawl(spider)
-            # Actual crawl done
-            print("Crawling in twisted done") 
-            self.logger.debug(f"Crawling in twisted done.")
-            self.process = None
-            self.status = "ready"
-            # reactor.stop()
+        self.process = CrawlerProcess(settings=self.settings)
+        self.process.crawl(sitemapspider)
+        self.process.crawl(spider)
+        # Similar approach:
+        # https://stackoverflow.com/questions/11528739/running-scrapy-spiders-in-a-celery-task
+        # threading VERY slow in Docker
+        # threading.Thread(target=self.process.start, args=(False,)).start()
+        self.p = Process(target=self.process.start, args=(False,))
+        self.p.start()
+        
 
-        crawl()
+        # https://stackoverflow.com/questions/14274916/execute-twisted-reactor-run-in-a-thread/14282640
+        # self.process = CrawlerRunner(settings=self.settings)
 
-        # reactor.run()
-        # threading.Thread(target=reactor.run, args=(False,)).start()
-        if not reactor.running:
-            threading.Thread(target=reactor.run, args=(False,)).start()
+        # spider = ScoringSpider  # CrawlerProcess accepts Spider class or Crawler instances
+        # sitemapspider = ScoringSpiderSitemap
+
+        # spider.start_urls = self.urls
+        # spider.allowed_domains = self.allowed_domains 
+        # spider.analyzer = Analyzer(self.analyzer_data_dir)
+        # sitemapspider.allowed_domains = self.allowed_domains
+        # sitemapspider.sitemap_urls = self.sitemap_urls
+        # sitemapspider.analyzer = spider.analyzer
+
+        # @defer.inlineCallbacks
+        # def crawl():
+        #     self.logger.debug(f"Crawling in twisted started.")
+        #     yield self.process.crawl(sitemapspider)
+        #     yield self.process.crawl(spider)
+        #     # Actual crawl done
+        #     print("Crawling in twisted done") 
+        #     self.logger.debug(f"Crawling in twisted done.")
+        #     self.process = None
+        #     self.status = "ready"
+        #     # reactor.stop()
+
+        # crawl()
+
+        # if not reactor.running:
+        #     threading.Thread(target=reactor.run, args=(False,)).start()
 
         self.status = "crawling"
 
@@ -156,6 +190,16 @@ class ScoringTool():
             except Exception as e:
                 print(e)
             self.status = "stopping"
+        elif self.status == "stopping":
+            # Second time, force stop
+            print("Second stop, killing p")
+            self.p.terminate()
+            time.sleep(0.1)
+            if not self.p.is_alive():
+                print("p is a goner")
+                self.p.join(timeout=1.0)
+                print("Joined p successfully!")
+                self.status = "ready"
 
         current_status = {}
         try:

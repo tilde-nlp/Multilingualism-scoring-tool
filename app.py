@@ -68,8 +68,11 @@ class ScoringHandler(tornado.web.RequestHandler):
         elif q == "quit":
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
             self.logger.debug(f"Server received quit request")
-            reactor.stop()
-            self.logger.debug(f"Twisted reactor stopped")
+            try:
+                reactor.stop()
+                self.logger.debug(f"Twisted reactor stopped")
+            except Exception as e:
+                self.logger.error(e)
             sys.exit()
 
 def make_app(scorer):
