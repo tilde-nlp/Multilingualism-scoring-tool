@@ -157,7 +157,7 @@ crossorigin="anonymous"></script>
                                   $(".done-alert").hide();
                                   crawling_in_progress = 0;
                               } else if(res.status === "stopping") {
-                                  $(".status-alert").hide();
+                                  $(".status-alert").show();
                                   $(".done-alert").hide();
                                   crawling_in_progress = 1;
                               } else {

@@ -20,27 +20,18 @@ from twisted.internet import reactor, defer
 from scrapy.utils.project import get_project_settings
 
 class ScoringTool():
-    def __init__(self):
+    def __init__(self, config):
         self.logger = logging.getLogger("ScoringTool")
         
         # settings = {}
         self.settings = get_project_settings()        
 
-        self.config = configparser.ConfigParser()
-        self.config.read('settings.ini')
+        self.config = config
         def override_default_crawler_config():
             for key in self.config['crawler']:
                 self.settings[key.upper()] = self.config.get('crawler', key, fallback='')
         override_default_crawler_config()
-        def clear_log_file(): # Use new log file for each run
-            try:
-                os.remove(self.settings['LOG_FILE'])
-            except PermissionError:
-                pass
-            except FileNotFoundError:
-                pass
-        clear_log_file()
-        self.status = "ready" # ready, error, crawling finished, crawling
+        self.status = "ready" # ready, crawling, stopping, error 
 
 
     def get_crawl_progress_status(self):
@@ -78,7 +69,7 @@ class ScoringTool():
     
 
     def start_crawl(self, urls, hops):
-        if self.status == "crawling":
+        if self.status != "ready":
             current_status = {}
             current_status["status"] = "error" 
             current_status["message"] = "Can not start, already crawling."
@@ -107,15 +98,6 @@ class ScoringTool():
                     of.write(f'{key}, {value}\n')
         dump_config_to_file_for_debug()
 
-        # def clear_log_file(): # Use new log file for each run
-        #     try:
-        #         os.remove(self.settings['LOG_FILE'])
-        #     except PermissionError:
-        #         pass
-        #     except FileNotFoundError:
-        #         pass
-        # clear_log_file()
-
         def clean_analyzed_dir_before_running():
             try:
                 shutil.rmtree(self.analyzer_data_dir)
@@ -123,8 +105,6 @@ class ScoringTool():
                 print("Exception "+str(e))
                 pass
         clean_analyzed_dir_before_running()
-
-        self.status = "ready"
 
         # https://stackoverflow.com/questions/14274916/execute-twisted-reactor-run-in-a-thread/14282640
         # process = CrawlerProcess(settings=settings)
@@ -149,6 +129,7 @@ class ScoringTool():
             # Actual crawl done
             print("Crawling in twisted done") 
             self.logger.debug(f"Crawling in twisted done.")
+            self.process = None
             self.status = "ready"
             # reactor.stop()
 
@@ -169,11 +150,12 @@ class ScoringTool():
 
     def stop_crawl(self):
         print("Stop command received")
-        try:
-            self.process.stop()
-        except Exception as e:
-            print(e)
-        self.status = "stopping"
+        if self.status == "crawling":
+            try:
+                self.process.stop()
+            except Exception as e:
+                print(e)
+            self.status = "stopping"
 
         current_status = {}
         try:

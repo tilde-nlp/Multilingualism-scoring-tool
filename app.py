@@ -1,9 +1,6 @@
-import os
-import shutil
 import sys
 import json
-import threading
-from multiprocessing import Process
+import logging
 
 import signal
 import tornado.ioloop
@@ -13,8 +10,6 @@ from twisted.internet import reactor
 from urllib.parse import urlparse
 import configparser
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
-import scrapy
-from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
 from modules.scoring_tool import ScoringTool
@@ -22,6 +17,7 @@ from modules.scoring_tool import ScoringTool
 class ScoringHandler(tornado.web.RequestHandler):
     def initialize(self, scorer):
         self.scorer = scorer
+        self.logger = logging.getLogger("ScoringHandler")
 
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -48,6 +44,7 @@ class ScoringHandler(tornado.web.RequestHandler):
         q = self.get_query_argument("q", "", False)
 
         if q == "start_crawl":
+            self.logger.debug(f"Server received start_crawl request")
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
             urls = urls.split("\n")
@@ -57,18 +54,22 @@ class ScoringHandler(tornado.web.RequestHandler):
             # Status message, about crawling started
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_crawl_progress_status":
+            self.logger.debug(f"Server received get_crawl_progress_status request")
             response = self.scorer.get_crawl_progress_status()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_current_scores":
+            self.logger.debug(f"Server received get_current_scores request")
             response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "stop_crawl":
+            self.logger.debug(f"Server received stop_crawl request")
             response = self.scorer.stop_crawl()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "quit":
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
-            print("Exiting")
+            self.logger.debug(f"Server received quit request")
             reactor.stop()
+            self.logger.debug(f"Twisted reactor stopped")
             sys.exit()
 
 def make_app(scorer):
@@ -83,20 +84,36 @@ def sig_exit(signum, frame):
     tornado.ioloop.IOLoop.instance().add_callback_from_signal(do_stop)
 
 def do_stop():
-    print("Trying to stop")
+    logging.debug(f"Server received CTRL+C signal")
     tornado.ioloop.IOLoop.instance().stop()
 
 
 def run_scoring_web():
-    PORT = '8989'
-    # ADDRESS = '127.0.0.127'
+    config = configparser.ConfigParser(interpolation=None)
+    config.read('settings.ini')
 
-    scorer = ScoringTool()
+    PORT = '8989'
+    ADDRESS = '127.0.0.127'
+    
+    logging.basicConfig(
+        filename = config.get('app', 'LOG_FILE', fallback='app.log'),
+        encoding = config.get('app', 'LOG_ENCODING', fallback='utf-8'),
+        format = config.get('app', 'LOG_FORMAT', fallback='%(asctime)s %(message)s'),
+        datefmt = config.get('app', 'LOG_DATEFORMAT', fallback='%H:%M:%S'),
+        level=getattr(logging, config.get('app', 'LOG_LEVEL', fallback='ERROR').upper()),
+        filemode='w',
+    )
+    logger = logging.getLogger("app")
+    logger.log(logging.DEBUG, "App logger started")
+
+    scorer = ScoringTool(config)
+
     app = make_app(scorer)
 
     # app.listen(PORT, address = ADDRESS)
     app.listen(PORT)
     signal.signal(signal.SIGINT, sig_exit)
+    logger.debug(f"Server started on {PORT} port!")
     # print(f"Server started on {ADDRESS}:{PORT}!")
     print(f"Server started on {PORT} port!")
     tornado.ioloop.IOLoop.current().start()
