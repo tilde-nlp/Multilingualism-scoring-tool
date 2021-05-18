@@ -108,17 +108,24 @@ class ScoringTool():
         return current_status
     
 
-    def start_crawl(self, urls, hops):
+    def start_crawl(self, urls: list, hops:int) -> dict:
         if self.status in ["crawling", "stopping"]:
             current_status = {}
             current_status["status"] = "error" 
             current_status["message"] = "Can not start, already crawling."
             return current_status
-            
-        self.urls = urls
+        def verify_and_try_to_fix_urls(urls: list) -> list:
+            stripped_urls = [url.strip() for url in urls if url.strip()]
+            fixed_urls = []
+            for url in stripped_urls:
+                if not url.startswith('http'): # prepend protocol if not present
+                    url = 'http://' + url
+                fixed_urls.append(url)
+            return fixed_urls
+        self.urls = verify_and_try_to_fix_urls(urls)
 
         self.sitemap_urls = []
-        for url in urls:
+        for url in self.urls:
             parsed_url = urlparse(url)
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/sitemap.xml')
             self.sitemap_urls.append(f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt')
@@ -129,7 +136,7 @@ class ScoringTool():
 
         self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir)
-        self.allowed_domains = [extractDomain(i) for i in urls]
+        self.allowed_domains = [extractDomain(i) for i in self.urls]
         # print(f'\nPrepared allowed_domains {allowed_domains}\n')
 
         def dump_config_to_file_for_debug():
