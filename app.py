@@ -1,6 +1,7 @@
 import sys
 import json
 import logging
+import time
 
 import signal
 import tornado.ioloop
@@ -69,7 +70,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
             self.logger.debug(f"Server received quit request")
             try:
-                reactor.stop()
+                response = self.scorer.stop_crawl()
                 self.logger.debug(f"Twisted reactor stopped")
             except Exception as e:
                 self.logger.error(e)
@@ -95,6 +96,9 @@ def run_scoring_web():
     config = configparser.ConfigParser(interpolation=None)
     config.read('settings.ini')
 
+    report_config = configparser.ConfigParser(interpolation=None)
+    report_config.read('report_settings.ini')
+
     PORT = '8989'
     ADDRESS = '127.0.0.127'
     
@@ -109,7 +113,7 @@ def run_scoring_web():
     logger = logging.getLogger("app")
     logger.log(logging.DEBUG, "App logger started")
 
-    scorer = ScoringTool(config)
+    scorer = ScoringTool(config, report_config)
 
     app = make_app(scorer)
 
@@ -122,31 +126,41 @@ def run_scoring_web():
     tornado.ioloop.IOLoop.current().start()
 
 
-# def run_scoring(urls=None):
-#     if urls == None:
-#         urls = [
-#             # 'https://www.bmw.com/',  # quite mulitlingual
-#             # 'https://www.memorywater.com/', # 19 links l2, 3 langs 
-#             # 'https://www.tilde.lv/',    # mulitlingual .ee .lt
-#             'http://gorny.edu.pl/', # 5 links l2, mono
-#             # 'https://www.norden.org/',
-#             # 'https://europa.eu/',
-#             # 'https://globalvoices.org/',
-#             # 'https://www.royalfloraholland.com',
-#             # 'https://luxexpress.com',
-#             # 'https://aerodium.technology',
-#             # 'https://www.madaracosmetics.com',
-#             # 'https://www.airbaltic.com',
-#             # 'https://census.gov.uk/help/languages-and-accessibility/languages',
 
-#         ]
 
-#     scorer = ScoringTool()
+sample_urls = [
+    'https://www.bmw.com/',  # quite mulitlingual
+    'https://www.memorywater.com/', # 19 links l2, 3 langs 
+    'https://www.tilde.lv/',    # mulitlingual .ee .lt
+    'http://gorny.edu.pl/', # 5 links l2, mono
+    'https://www.norden.org/',
+    'https://europa.eu/',
+    'https://globalvoices.org/',
+    'https://www.royalfloraholland.com',
+    'https://luxexpress.com',
+    'https://aerodium.technology',
+    'https://www.madaracosmetics.com',
+    'https://www.airbaltic.com',
+    'https://census.gov.uk/help/languages-and-accessibility/languages',
+]
+
+def run_scoring(urls=sample_urls, hops=1):
+    if urls == None:
+        return 0
+    config = configparser.ConfigParser(interpolation=None)
+    config.read('settings.ini')
+    report_config = configparser.ConfigParser(interpolation=None)
+    report_config.read('report_settings.ini')
     
-#     score = scorer.initialize(urls)
+    scorer = ScoringTool(config, report_config)
+    response = scorer.start_crawl(urls, hops)
+    while response['status'] == "crawling":
+        time.sleep(10)
+        response = scorer.get_crawl_progress_status()
+    response = scorer.stop_crawl()
+    response = scorer.get_current_stats()
+    sys.exit()
 
-#     print("Done crawling ")
-#     return score    # returns last score for testing
 
 
 if __name__ == "__main__":

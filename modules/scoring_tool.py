@@ -6,7 +6,6 @@ import logging
 import time
 
 from urllib.parse import urlparse
-import configparser
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
 import scrapy
 from scrapy import signals
@@ -26,7 +25,7 @@ from multiprocessing import Process, Queue
 
 
 class ScoringTool():
-    def __init__(self, config):
+    def __init__(self, config, report_config):
         self.logger = logging.getLogger("ScoringTool")
         
         # settings = {}
@@ -37,10 +36,14 @@ class ScoringTool():
             for key in self.config['crawler']:
                 self.settings[key.upper()] = self.config.get('crawler', key, fallback='')
         override_default_crawler_config()
-        self.status = "ready" # ready, crawling, stopping, error 
+
+        self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
+        self.reporter = Reporter(self.analyzer_data_dir, report_config)
         self.p = None
         self.process = None
         self.queue = Queue()
+
+        self.status = "ready" # ready, crawling, stopping, error 
 
 
     def stop_crawler(self, spider):
@@ -134,8 +137,6 @@ class ScoringTool():
         # override DEPTH_LIMIT with "hops" from UI
         self.settings['DEPTH_LIMIT'] = hops
 
-        self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
-        self.reporter = Reporter(self.analyzer_data_dir)
         self.allowed_domains = [extractDomain(i) for i in self.urls]
         # print(f'\nPrepared allowed_domains {allowed_domains}\n')
 
