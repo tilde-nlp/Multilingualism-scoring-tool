@@ -7,6 +7,14 @@ import justext
 from trafilatura.core import extract
 import html_text
 
+
+def is_ok_job_name(job_name:str) -> bool:
+    # this will be a file name, so alphanumerics only
+    if not job_name.isalnum():
+        return False
+    return True
+
+
 def extractDomain(url):
     if "http" in str(url) or "www" in str(url):
         parsed = tldextract.extract(url)

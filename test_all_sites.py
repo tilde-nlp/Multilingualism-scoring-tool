@@ -150,6 +150,7 @@ class TestSpider(unittest.TestCase):
             ]
         config = configparser.ConfigParser(interpolation=None)
         config.read('settings.ini')
+        config['crawler']['DOWNLOAD_DELAY'] = "0"
         report_config = configparser.ConfigParser(interpolation=None)
         report_config.read('report_settings.ini')
 

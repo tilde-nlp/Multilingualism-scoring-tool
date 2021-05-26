@@ -87,6 +87,7 @@ class Reporter():
             share = count/page_count
             sum_pi_squared = sum_pi_squared + (share * share)
         stats['LDI_pages'] = 1 - sum_pi_squared
+        stats['LDI_pages'] = round(stats['LDI_pages'], 2)
         # LDI calculated using words, not page counts
         sum_pi_squared_words = 0
         total_words = 1 if total_words == 0 else total_words # avoid /0
@@ -94,6 +95,7 @@ class Reporter():
             share = count/total_words
             sum_pi_squared_words = sum_pi_squared_words + (share * share)
         stats['LDI_words'] = 1 - sum_pi_squared_words
+        stats['LDI_words'] = round(stats['LDI_words'],2)
 
     
         self.logger.log(logging.INFO,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")

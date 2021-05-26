@@ -2,11 +2,13 @@ import sys
 import json
 import logging
 import time
+from pathlib import Path
 
 import signal
 import tornado.ioloop
 import tornado.web
 from twisted.internet import reactor
+from mimetypes import guess_type
 
 from urllib.parse import urlparse
 import configparser
@@ -14,6 +16,8 @@ import configparser
 from scrapy.utils.project import get_project_settings
 
 from modules.scoring_tool import ScoringTool
+from modules.scoring_tool import *
+from modules.common_functions import is_ok_job_name
 
 class ScoringHandler(tornado.web.RequestHandler):
     def initialize(self, scorer):
@@ -26,9 +30,20 @@ class ScoringHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET')
 
     def get(self):
-        with open("index.html", "r", encoding='utf-8') as htmlf:
-            html = htmlf.read()
-        self.write(html)
+        q = self.get_query_argument("q", "", False)
+        if q == "download_results":
+            local_file = self.scorer.save_results_as(self.scorer.jobtitle)
+            # save_results_as(title_of_datajob)
+            content_type, _ = guess_type(local_file)
+            self.logger.debug(f"Saved file content type is {content_type}")
+            self.add_header('Content-Type', content_type)
+            self.add_header('Content-Disposition', f'attachment; filename="{Path(local_file).name}"') 
+            with open(local_file) as source_file:
+                self.write(source_file.read())
+        else:
+            with open("index.html", "r", encoding='utf-8') as htmlf:
+                html = htmlf.read()
+                self.write(html)
 
 
     def post(self):
@@ -48,10 +63,11 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(f"Server received start_crawl request")
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
+            jobtitle = self.get_body_argument("title_of_datajob", default="crawljob", strip=False)
             urls = urls.split("\n")
             hops = int(hops)
 
-            response = self.scorer.start_crawl(urls, hops)
+            response = self.scorer.start_crawl(urls, hops, jobtitle)
             # Status message, about crawling started
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_crawl_progress_status":
@@ -62,6 +78,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(f"Server received get_current_scores request")
             response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
+
         elif q == "stop_crawl":
             self.logger.debug(f"Server received stop_crawl request")
             response = self.scorer.stop_crawl()
@@ -70,8 +87,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
             self.logger.debug(f"Server received quit request")
             try:
-                response = self.scorer.stop_crawl()
-                self.logger.debug(f"Twisted reactor stopped")
+                reactor.stop()
             except Exception as e:
                 self.logger.error(e)
             sys.exit()
@@ -102,16 +118,17 @@ def run_scoring_web():
     PORT = '8989'
     ADDRESS = '127.0.0.127'
     
-    logging.basicConfig(
-        filename = config.get('app', 'LOG_FILE', fallback='app.log'),
-        encoding = config.get('app', 'LOG_ENCODING', fallback='utf-8'),
-        format = config.get('app', 'LOG_FORMAT', fallback='%(asctime)s %(message)s'),
-        datefmt = config.get('app', 'LOG_DATEFORMAT', fallback='%H:%M:%S'),
-        level=getattr(logging, config.get('app', 'LOG_LEVEL', fallback='ERROR').upper()),
-        filemode='w',
-    )
-    logger = logging.getLogger("app")
-    logger.log(logging.DEBUG, "App logger started")
+    # logging.basicConfig(
+    #     filename = config.get('app', 'LOG_FILE', fallback='app.log'),
+    #     encoding = config.get('app', 'LOG_ENCODING', fallback='utf-8'),
+    #     format = config.get('app', 'LOG_FORMAT', fallback='%(asctime)s %(message)s'),
+    #     datefmt = config.get('app', 'LOG_DATEFORMAT', fallback='%H:%M:%S'),
+    #     level=getattr(logging, config.get('app', 'LOG_LEVEL', fallback='ERROR').upper()),
+    #     filemode='w',
+    # )
+    # logger = logging.getLogger("app")
+    logging.debug("App logger started")
+    # logger.log(logging.DEBUG, "App logger started")
 
     scorer = ScoringTool(config, report_config)
 
@@ -120,7 +137,8 @@ def run_scoring_web():
     # app.listen(PORT, address = ADDRESS)
     app.listen(PORT)
     signal.signal(signal.SIGINT, sig_exit)
-    logger.debug(f"Server started on {PORT} port!")
+    # logger.debug(f"Server started on {PORT} port!")
+    logging.debug(f"Server started on {PORT} port!")
     # print(f"Server started on {ADDRESS}:{PORT}!")
     print(f"Server started on {PORT} port!")
     tornado.ioloop.IOLoop.current().start()

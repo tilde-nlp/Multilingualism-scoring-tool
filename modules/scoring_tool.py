@@ -4,6 +4,8 @@ import sys
 # import threading
 import logging
 import time
+from datetime import datetime
+import json
 
 from urllib.parse import urlparse
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
@@ -14,7 +16,7 @@ from modules.spider import ScoringSpider
 from modules.spider import ScoringSpiderSitemap
 from modules.analyzer import Analyzer
 from modules.reporter import Reporter
-from modules.common_functions import extractDomain
+from modules.common_functions import extractDomain, is_ok_job_name
 
 from twisted.internet import reactor, defer
 
@@ -38,6 +40,7 @@ class ScoringTool():
         override_default_crawler_config()
 
         self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
+        self.jobtitle = self.config.get('analyzer', 'default_titledata_dir', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir, report_config)
         self.p = None
         self.process = None
@@ -53,7 +56,6 @@ class ScoringTool():
         if len(self.process.crawlers) <= 1:
             current = multiprocessing.current_process()
             if current.name.startswith("Process"):
-                print(f"Last spider, {spider} finished. Stopping process...")
                 self.queue.put("Finished Crawling")
 
 
@@ -100,23 +102,40 @@ class ScoringTool():
             try:
                 stats = self.reporter.get_stats(domain)
             except Exception as e:
-                self.logger.error(f"{e}")
+                self.logger.error(f"Domain {domain}, could not create stats: {e}")
+                continue
             # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
             score = self.reporter.get_score_from_stats(stats)
             score = score * 100
             score = "{:0.2f}".format(score)
-            print("Domain: {}, score: {}, langs: {}".format(domain, score, stats['langs']))
             current_status[domain] = (score, stats)
-        # return (score, stats)
         return current_status
-    
 
-    def start_crawl(self, urls: list, hops:int) -> dict:
+
+    def save_results_as(self, title_of_datajob: str) -> str:
+        current_stats = self.get_current_stats()
+        saved_results_dir = self.config.get('app', 'SAVED_RESULTS_DIR', fallback='saved_results') 
+        os.makedirs(saved_results_dir, exist_ok=True)
+        current_date = datetime.today().strftime('%Y%m%d')
+        local_filename = os.path.join(saved_results_dir, f'{title_of_datajob}_{current_date}.json')
+        with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
+            json.dump(current_stats, saved_res_f)
+        return local_filename
+
+
+    def start_crawl(self, urls: list, hops:int, jobtitle:str="scoring") -> dict:
         if self.status in ["crawling", "stopping"]:
             current_status = {}
             current_status["status"] = "error" 
             current_status["message"] = "Can not start, already crawling."
             return current_status
+        if not is_ok_job_name(jobtitle):
+            response = {}
+            response["status"] = "error" 
+            response["message"] = "Only letters and numbers allowed in job title."
+            self.logger.debug(f"title was not alphanumeric: {jobtitle}")
+            return response
+        self.jobtitle = jobtitle
         def verify_and_try_to_fix_urls(urls: list) -> list:
             stripped_urls = [url.strip() for url in urls if url.strip()]
             fixed_urls = []
@@ -189,21 +208,20 @@ class ScoringTool():
 
 
     def stop_crawl(self):
-        print("Stop command received")
         if self.status == "crawling":
             try:
                 self.process.stop()
+                time.sleep(0.1)
+                self.p.terminate()
+                time.sleep(0.1)
             except Exception as e:
                 print(e)
             self.status = "stopping"
         elif self.status == "stopping":
-            # Second time, force stop
-            print("Second stop, killing p")
             self.p.terminate()
             time.sleep(0.1)
             if not self.p.is_alive():
                 self.p.join(timeout=1.0)
-                print("Joined p successfully!")
                 self.status = "ready"
 
         current_status = {}

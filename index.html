@@ -98,6 +98,8 @@
           <tr>
             <th scope="col">Url</th>
             <th scope="col">Language balance</th>
+            <th scope="col">LDI_pages</th>
+            <th scope="col">LDI_words</th>
             <th scope="col">Language count</th>
             <th scope="col">Languages</th>
             <th scope="col">Words per language</th>
@@ -112,6 +114,21 @@
         </tbody>
       </table>
     </div>
+  </div>
+
+  <div class="col-md-10 offset-1">
+    <form class="needs-validation" novalidate="">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="zip">Job name, only alphanumeric symbols</label>
+          <textarea class="form-control" id="titleOfJob" rows="1"></textarea>
+        </div>
+      </div>
+
+      <hr class="mb-4">
+      <a href = "score?q=download_results">Download results</a>
+      <!--<button class="btn btn-primary btn-lg btn-block" id="download_results" type="submit">Save results as file</button>-->
+    </form>
   </div>
 
   <footer class="my-5 pt-5 text-muted text-center text-small">
@@ -137,7 +154,8 @@ crossorigin="anonymous"></script>
       <script>
               $(document).ready(function() {
                 var crawling_in_progress = 0;
-                var serverUrl = "http://127.0.0.127:8989";
+                //var serverUrl = "http://127.0.0.127:8989";
+                var serverUrl = "";
 
                   var get_crawl_progress_status = function(){
                     const url = serverUrl + "/score?q=get_crawl_progress_status";
@@ -187,6 +205,21 @@ crossorigin="anonymous"></script>
 
                     }));
 
+                    $("#download_results").on("click", ((event)=>{
+                      event.preventDefault();
+                      const url = serverUrl + "/score?q=download_results";
+                      const titleOfJob = $("#titleOfJob").val();
+                      $.ajax({
+                              type: "GET",
+                              url: url,
+                              data: {title_of_datajob: titleOfJob},
+                              success: ((res)=>{
+                                //get_crawl_progress_status();
+                              })
+                            });
+
+                    }));
+
                     $(".stop-crawl").on("click", ((event)=>{
                       event.preventDefault();
                       const url = serverUrl + "/score?q=stop_crawl";
@@ -222,6 +255,8 @@ crossorigin="anonymous"></script>
                                     let tablerow = "<tr>";
                                     tablerow += "<th scope='row'>"+dataRow[0]+"</th>";
                                     tablerow += "<td>"+dataRow[1]+"</td>";
+                                    tablerow += "<td>"+dataRow[2].LDI_pages+"</td>";
+                                    tablerow += "<td>"+dataRow[2].LDI_words+"</td>";
                                     tablerow += "<td>"+dataRow[2].lang_count+"</td>";
                                     tablerow += "<td>";
                                       for (const [key, value] of Object.entries(dataRow[2].langs)) {
