@@ -47,16 +47,6 @@ class ScoringHandler(tornado.web.RequestHandler):
 
 
     def post(self):
-        # API v.1
-        #     start_crawl(urls, settings={hopi,})
-        #         starts crawling of urls using settings
-        #         returns "Started crawling of {len(urls)} urls."
-        #     get_crawl_progress_status()
-        #         ? return current depth of crawling for each url ?
-        #     get_current_scores()
-        #         returns statistics&scores at this moment
-        #     stop_crawl()
-        #         stops crawling and returns get_current_scores()
         q = self.get_query_argument("q", "", False)
 
         if q == "start_crawl":
@@ -78,7 +68,6 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(f"Server received get_current_scores request")
             response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
-
         elif q == "stop_crawl":
             self.logger.debug(f"Server received stop_crawl request")
             response = self.scorer.stop_crawl()

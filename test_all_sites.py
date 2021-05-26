@@ -183,7 +183,7 @@ class TestSpider(unittest.TestCase):
 
         response = scorer.get_current_stats()
         score, stats = response['127.0.0.4']
-        self.assertEqual(score, '0.00')
+        self.assertEqual(score, '4.17') # 1 * 1 / 24 # pl balance 1/24 eu langs
         score, stats = response['127.0.0.5']
         self.assertNotEqual(score, '0.00')
 

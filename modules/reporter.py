@@ -7,12 +7,26 @@ calculate multilinguality score
 import os
 import logging
 
+def get_language_balance(langs:dict) -> float:
+    lang_count = len(langs) 
+    largest = max(langs, key=langs.get)
+    largest_value = langs.get(largest, 1)
+    if lang_count < 1 or largest_value < 1:
+        return 0
+    page_count = 0
+    for lang, count in langs.items():
+        page_count = page_count + count
+    average_page_count = page_count / lang_count
+    language_balance = average_page_count / largest_value
+    return language_balance
+
 class Reporter():
     def __init__(self, data_dir, report_config):
         self.logger = logging.getLogger("Reporter")
         self.data_dir = data_dir
         self.logger.log(logging.INFO, f"Reporter using data dir: {self.data_dir}")
-        self.primary_langs = report_config.get('reporter', 'PRIMARY_LANGUAGES', fallback='').split(' ')
+        eu_langs = "bg cs da de el en es et fi fr ga hr hu is it lt lv mt nl no pl pt ro sk sl sv"
+        self.primary_langs = report_config.get('reporter', 'PRIMARY_LANGUAGES', fallback=eu_langs).split(' ')
         self.secondary_langs = report_config.get('reporter', 'SECONDARY_LANGUAGES', fallback='').split(' ')
         self.other_langs = report_config.get('reporter', 'OTHER_LANGUAGES', fallback='').split(' ')
         self.logger.log(logging.INFO, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
@@ -26,6 +40,7 @@ class Reporter():
             'LDI_pages':0,
             'LDI_words':0,
             'language_balance':0,
+            'language_balance_primary':0,
             'lang_count':0,
             'langs':langs,
             'langs_words':langs_words,
@@ -33,6 +48,8 @@ class Reporter():
             'total_words':0,
             'wo_lang_pages':0,
             'wo_lang_words':0,
+            'coverage_primary':0,
+
         }
         if not os.path.exists(self.data_dir):
             self.logger.log(logging.ERROR,f"Could not find data dir: {self.data_dir}")
@@ -70,15 +87,27 @@ class Reporter():
         # language_balance = average(count_l1, count_l2, ..., count_ln)/count_max
         largest = max(langs, key=langs.get)
         largest_value = langs.get(largest, 1)
-        page_count = 0
+        langs_primary = {}
+        for lang, count in langs.items():
+            if lang in self.primary_langs:
+                langs_primary[lang] = count
+        coverage_primary = 0 # How many of EU languages (or some other set) are present in a website 0(min)-1(max)
         total_words = 0
+        page_count = 0
         lang_stats_for_debug = ""
         for lang, count in langs.items():
             page_count = page_count + count
             total_words = total_words + langs_words.get(lang, 0)
             lang_stats_for_debug = lang_stats_for_debug + "{}:{}:{} ".format(lang, count, langs_words.get(lang, 0))
-        average_page_count = page_count / stats['lang_count']
-        stats['language_balance'] = average_page_count / largest_value
+            if lang in self.primary_langs:
+                coverage_primary = coverage_primary + 1
+        count_primary_langs = len(self.primary_langs) if len(self.primary_langs) > 0 else 1 # avoid /0 
+        stats['coverage_primary'] = coverage_primary/count_primary_langs
+
+        stats['language_balance'] = get_language_balance(langs)
+        stats['language_balance_primary'] = get_language_balance(langs_primary)
+
+
         # Lieberson’s diversity index (LDI) (Lieberson 1981)
         # LDI = 1 - ΣPi*Pi , where Pi represents the share of i-th language speakers in a community
         sum_pi_squared = 0
@@ -97,8 +126,7 @@ class Reporter():
         stats['LDI_words'] = 1 - sum_pi_squared_words
         stats['LDI_words'] = round(stats['LDI_words'],2)
 
-    
-        self.logger.log(logging.INFO,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")
+        self.logger.log(logging.INFO,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},language_balance_primary {stats['language_balance_primary']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")
 
         return stats
 
@@ -106,8 +134,10 @@ class Reporter():
     def get_score_from_stats(self, stats):
         if stats == None:
             return 0
-        factor = 1 if stats['lang_count'] > 1 else 0 # lang_count/26    # If single lang balance == 0 
-        score = factor * stats['language_balance']
+        self.logger.log(logging.INFO, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
+        # factor = 1 if stats['lang_count'] > 1 else 0 # lang_count/26    # If single lang balance == 0 
+        # score = factor * stats['language_balance']
+        score = stats['language_balance_primary'] * stats['coverage_primary']
         return score
 
 
