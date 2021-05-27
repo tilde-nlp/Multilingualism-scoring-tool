@@ -38,6 +38,10 @@
       display: none;
     }
 
+    .error-alert {
+      display: none;
+    }
+
     #download_results_wrapper {
       display: none;
     }
@@ -69,6 +73,10 @@
 
       <div class="alert alert-secondary justify-content-between align-items-center done-alert" role="alert">
         Crawling finished.
+       </div>
+
+       <div class="alert alert-secondary justify-content-between align-items-center error-alert" role="alert">
+        
        </div>
 
       <h4 class="mb-3">Crawling data</h4>
@@ -183,6 +191,8 @@ crossorigin="anonymous"></script>
                                 crawling_in_progress = 0;
                                 $(".status-alert").hide();
                                 $(".done-alert").hide();
+                                $(".error-alert").html(res.message);
+                                $(".error-alert").show();
                                 $("#crawling-form :input").prop("disabled", false);
                               } else if(res.status === "ready") {
                                   // crawling finished
@@ -190,11 +200,13 @@ crossorigin="anonymous"></script>
                                   handle = 0;
                                   $(".status-alert").hide();
                                   $(".done-alert").hide();
+                                  $(".error-alert").hide();
                                   crawling_in_progress = 0;
                                   $("#crawling-form :input").prop("disabled", false);
                               } else if(res.status === "stopping") {
                                   $(".status-alert").show();
                                   $(".done-alert").hide();
+                                  $(".error-alert").hide();
                                   crawling_in_progress = 1;
                                   $("#crawling-form :input").prop("disabled", true);
                                   clearInterval(handle); 
@@ -206,6 +218,7 @@ crossorigin="anonymous"></script>
                                 $("#crawling-form :input").prop("disabled", true);
                                 $(".status-alert").show();
                                 $(".done-alert").hide();
+                                $(".error-alert").hide();
                                 refresh_stats();
                                 if(handle === 0) {
                                   startInterval();
@@ -290,12 +303,14 @@ crossorigin="anonymous"></script>
 
                     $("#start-crawling").on("click", ((event)=>{
                       event.preventDefault();
-                      $("#crawling-form :input").prop("disabled", true);
+
                       const url = serverUrl + "/score?q=start_crawl";
                       const urlsToCrawl = $("#urlsToCrawl").val();
                       const hops = $("#hops").val();
                       const titleOfJob = $("#titleOfJob").val(); 
-                      $.ajax({
+                      if (titleOfJob !== "") {
+                        $("#crawling-form :input").prop("disabled", true);
+                        $.ajax({
                               type: "POST",
                               url: url,
                               data: {urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob},
@@ -306,6 +321,11 @@ crossorigin="anonymous"></script>
                                 }
                               })
                             });
+                      } else {
+                        $(".error-alert").html("Please fill Job name!");
+                                $(".error-alert").show();
+                      }
+
 
                     }));
 
