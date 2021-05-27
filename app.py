@@ -53,7 +53,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(f"Server received start_crawl request")
             urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
-            jobtitle = self.get_body_argument("title_of_datajob", default="crawljob", strip=False)
+            jobtitle = self.get_body_argument("titleOfJob", default="crawljob", strip=False)
             urls = urls.split("\n")
             hops = int(hops)
 

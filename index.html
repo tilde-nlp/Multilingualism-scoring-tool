@@ -118,7 +118,7 @@
         <thead>
           <tr>
             <th scope="col">Url</th>
-            <th scope="col">Language balance</th>
+            <th scope="col">Normalised Language balance</th>
             <th scope="col">LDI_pages</th>
             <th scope="col">LDI_words</th>
             <th scope="col">Language count</th>
@@ -294,30 +294,16 @@ crossorigin="anonymous"></script>
                       const url = serverUrl + "/score?q=start_crawl";
                       const urlsToCrawl = $("#urlsToCrawl").val();
                       const hops = $("#hops").val();
+                      const titleOfJob = $("#titleOfJob").val(); 
                       $.ajax({
                               type: "POST",
                               url: url,
-                              data: {urls: urlsToCrawl, hops: hops},
+                              data: {urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob},
                               success: ((res)=>{
                                 get_crawl_progress_status();
                                 if(handle === 0) {
                                   startInterval();
                                 }
-                              })
-                            });
-
-                    }));
-
-                    $("#download_results").on("click", ((event)=>{
-                      event.preventDefault();
-                      const url = serverUrl + "/score?q=download_results";
-                      const titleOfJob = $("#titleOfJob").val();
-                      $.ajax({
-                              type: "GET",
-                              url: url,
-                              data: {title_of_datajob: titleOfJob},
-                              success: ((res)=>{
-                                //get_crawl_progress_status();
                               })
                             });
 
