@@ -59,7 +59,7 @@ class ScoringTool():
                 self.queue.put("Finished Crawling")
 
 
-    def get_crawl_progress_status(self):
+    def get_crawl_progress_status(self) -> dict:
         try:
             if self.queue.get_nowait() == "Finished Crawling":
                 self.process.stop()
@@ -89,7 +89,7 @@ class ScoringTool():
         return current_status
 
 
-    def get_current_stats(self):
+    def get_current_stats(self) -> dict:
         current_status = {}
         try: 
             allowed_domains = self.allowed_domains
@@ -97,6 +97,7 @@ class ScoringTool():
             current_status["status"] = "error" 
             current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
             return current_status
+
 
         for domain in self.allowed_domains:
             try:
@@ -108,6 +109,10 @@ class ScoringTool():
             score = self.reporter.get_score_from_stats(stats)
             score = score * 100
             score = "{:0.2f}".format(score)
+            for key, value in stats.items(): 
+                if key in Reporter.roundable_stats: # Convert to 0-100%
+                    value = value * 100
+                    stats[key] = "{:0.2f}".format(value)
             current_status[domain] = (score, stats)
         return current_status
 
@@ -121,6 +126,24 @@ class ScoringTool():
         with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
             json.dump(current_stats, saved_res_f)
         return local_filename
+
+    def save_results_as_csv(self, title_of_datajob: str) -> str:
+        current_stats = self.get_current_stats()
+        saved_results_dir = self.config.get('app', 'SAVED_RESULTS_DIR', fallback='saved_results') 
+        os.makedirs(saved_results_dir, exist_ok=True)
+        current_date = datetime.today().strftime('%Y%m%d')
+        local_filename = os.path.join(saved_results_dir, f'{title_of_datajob}_{current_date}.csv')
+        with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
+            saved_res_f.write(f"domain,score,{','.join(Reporter.roundable_stats)}\n")
+            for domain, (score, stats) in current_stats.items():
+                items = [domain, score]
+                for key, value in stats.items():
+                    if key in Reporter.roundable_stats:
+                        items.append(value) 
+                csv_row = ",".join(items)
+                saved_res_f.write(f"{csv_row}\n")
+        return local_filename
+
 
 
     def start_crawl(self, urls: list, hops:int, jobtitle:str="scoring") -> dict:
@@ -207,7 +230,7 @@ class ScoringTool():
         return current_status
 
 
-    def stop_crawl(self):
+    def stop_crawl(self) -> dict:
         if self.status == "crawling":
             try:
                 self.process.stop()

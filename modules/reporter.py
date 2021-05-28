@@ -21,16 +21,26 @@ def get_language_balance(langs:dict) -> float:
     return language_balance
 
 class Reporter():
+    roundable_stats = [ 
+        'LDI_pages', 
+        'LDI_words', 
+        'language_balance', 
+        'language_balance_primary',
+        'language_balance_extended',
+        'coverage_primary',
+        'coverage_extended',
+        ]
     def __init__(self, data_dir, report_config):
         self.logger = logging.getLogger("Reporter")
         self.data_dir = data_dir
         self.logger.log(logging.INFO, f"Reporter using data dir: {self.data_dir}")
-        eu_langs = "bg cs da de el en es et fi fr ga hr hu is it lt lv mt nl no pl pt ro sk sl sv"
+        eu_langs = "bg cs da de el en es et fi fr ga hr hu it lt lv mt nl pl pt ro sk sl sv"
         self.primary_langs = report_config.get('reporter', 'PRIMARY_LANGUAGES', fallback=eu_langs).split(' ')
-        self.secondary_langs = report_config.get('reporter', 'SECONDARY_LANGUAGES', fallback='').split(' ')
+        self.extended_langs = report_config.get('reporter', 'EXTENDED_LANGUAGES', fallback='is no').split(' ')
+        self.extended_langs = self.extended_langs + self.primary_langs 
         self.other_langs = report_config.get('reporter', 'OTHER_LANGUAGES', fallback='').split(' ')
         self.logger.log(logging.INFO, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
-        self.logger.log(logging.INFO, f"Reporter using SECONDARY_LANGUAGES: {self.secondary_langs}")
+        self.logger.log(logging.INFO, f"Reporter using EXTENDED_LANGUAGES: {self.extended_langs}")
         self.logger.log(logging.INFO, f"Reporter using OTHER_LANGUAGES: {self.other_langs}")
 
     def get_stats(self, domain):
@@ -41,6 +51,7 @@ class Reporter():
             'LDI_words':0,
             'language_balance':0,
             'language_balance_primary':0,
+            'language_balance_extended':0,
             'lang_count':0,
             'langs':langs,
             'langs_words':langs_words,
@@ -49,7 +60,7 @@ class Reporter():
             'wo_lang_pages':0,
             'wo_lang_words':0,
             'coverage_primary':0,
-
+            'coverage_extended':0,
         }
         if not os.path.exists(self.data_dir):
             self.logger.log(logging.ERROR,f"Could not find data dir: {self.data_dir}")
@@ -88,10 +99,14 @@ class Reporter():
         largest = max(langs, key=langs.get)
         largest_value = langs.get(largest, 1)
         langs_primary = {}
+        langs_extended = {}
         for lang, count in langs.items():
             if lang in self.primary_langs:
                 langs_primary[lang] = count
+            if lang in self.extended_langs:
+                langs_extended[lang] = count
         coverage_primary = 0 # How many of EU languages (or some other set) are present in a website 0(min)-1(max)
+        coverage_extended = 0
         total_words = 0
         page_count = 0
         lang_stats_for_debug = ""
@@ -101,11 +116,16 @@ class Reporter():
             lang_stats_for_debug = lang_stats_for_debug + "{}:{}:{} ".format(lang, count, langs_words.get(lang, 0))
             if lang in self.primary_langs:
                 coverage_primary = coverage_primary + 1
+            if lang in self.extended_langs:
+                coverage_extended = coverage_extended + 1
         count_primary_langs = len(self.primary_langs) if len(self.primary_langs) > 0 else 1 # avoid /0 
+        count_extended_langs = len(self.extended_langs) if len(self.extended_langs) > 0 else 1
         stats['coverage_primary'] = coverage_primary/count_primary_langs
+        stats['coverage_extended'] = coverage_extended/count_extended_langs
 
         stats['language_balance'] = get_language_balance(langs)
         stats['language_balance_primary'] = get_language_balance(langs_primary)
+        stats['language_balance_extended'] = get_language_balance(langs_extended)
 
 
         # Lieberson’s diversity index (LDI) (Lieberson 1981)
@@ -116,7 +136,7 @@ class Reporter():
             share = count/page_count
             sum_pi_squared = sum_pi_squared + (share * share)
         stats['LDI_pages'] = 1 - sum_pi_squared
-        stats['LDI_pages'] = round(stats['LDI_pages'], 2)
+        stats['LDI_pages'] = stats['LDI_pages']
         # LDI calculated using words, not page counts
         sum_pi_squared_words = 0
         total_words = 1 if total_words == 0 else total_words # avoid /0
@@ -124,7 +144,7 @@ class Reporter():
             share = count/total_words
             sum_pi_squared_words = sum_pi_squared_words + (share * share)
         stats['LDI_words'] = 1 - sum_pi_squared_words
-        stats['LDI_words'] = round(stats['LDI_words'],2)
+        stats['LDI_words'] = stats['LDI_words']
 
         self.logger.log(logging.INFO,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},language_balance_primary {stats['language_balance_primary']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")
 

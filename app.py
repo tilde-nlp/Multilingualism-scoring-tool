@@ -32,7 +32,7 @@ class ScoringHandler(tornado.web.RequestHandler):
     def get(self):
         q = self.get_query_argument("q", "", False)
         if q == "download_results":
-            local_file = self.scorer.save_results_as(self.scorer.jobtitle)
+            local_file = self.scorer.save_results_as_csv(self.scorer.jobtitle)
             # save_results_as(title_of_datajob)
             content_type, _ = guess_type(local_file)
             self.logger.debug(f"Saved file content type is {content_type}")
