@@ -51,9 +51,18 @@ class ScoringHandler(tornado.web.RequestHandler):
 
         if q == "start_crawl":
             self.logger.debug(f"Server received start_crawl request")
-            urls = self.get_body_argument("urls", default=None, strip=False)
+            self.logger.debug(self.request)
+            self.logger.debug(self.request.files)
+
+            if self.request.files:
+                self.logger.debug("There is urlFile",self.request.files['input_file'][0]['filename'])
+                filecontent = self.request.files['input_file'][0]['body']
+                urls = filecontent.decode("utf-8") 
+            else:
+                urls = self.get_body_argument("urls", default=None, strip=False)
             hops = self.get_body_argument("hops", default=None, strip=False)
             jobtitle = self.get_body_argument("titleOfJob", default="crawljob", strip=False)
+
             urls = urls.split("\n")
             hops = int(hops)
 
