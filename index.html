@@ -88,6 +88,11 @@
               <label for="exampleFormControlTextarea1">Urls (each in new line):</label>
               <textarea class="form-control" id="urlsToCrawl" rows="5"></textarea>
             </div>
+            OR
+            <div class="form-group">
+              <label for="text-file">Upload text file:</label>
+              <input type="file" id="input_file">
+            </div>
             </div>
         </div>
 
@@ -97,15 +102,14 @@
             <label for="zip" data-toggle="tooltip" title="Recommended value is 3, shallower crawl may not give accurate result, while deeper crawl will take longer to finish.">Crawling depth:</label>
             <input type="number" value="1" class="form-control" min="0" max="999" id="hops" placeholder="0" required="">
           </div>
-        </div>
-
-        <div class="row">
           <div class="col-md-6 mb-3">
             <label for="zip">Job name:</label>
             <input type="text" class="form-control" id="titleOfJob" placeholder="" required="">
             <small>Alphanumeric symbols only</small>
           </div>
         </div>
+
+
 
         
         <hr class="mb-4">
@@ -308,12 +312,13 @@ crossorigin="anonymous"></script>
                       const urlsToCrawl = $("#urlsToCrawl").val();
                       const hops = $("#hops").val();
                       const titleOfJob = $("#titleOfJob").val(); 
+                      const inputFile = $("#input_file").val(); 
                       if (titleOfJob !== "") {
                         $("#crawling-form :input").prop("disabled", true);
                         $.ajax({
                               type: "POST",
                               url: url,
-                              data: {urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob},
+                              data: {urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob, input_file: inputFile},
                               success: ((res)=>{
                                 get_crawl_progress_status();
                                 if(handle === 0) {
