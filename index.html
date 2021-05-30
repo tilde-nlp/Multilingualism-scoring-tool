@@ -49,6 +49,72 @@
     .inline-logo {
       height: 30px;
     }
+
+
+
+    .upload-area{
+        width: 100%;
+        height: 100px;
+        border: 2px solid lightgray;
+        border-radius: 3px;
+        margin: 0 auto;
+        /* margin-top: 100px; */
+        text-align: center;
+        overflow: auto;
+        position: relative;
+    }
+
+    .upload-area:hover{
+        cursor: pointer;
+        /* border: 2px dotted lightgray; */
+    }
+
+    .upload-area h1{
+        text-align: center;
+        font-weight: normal;
+        font-family: sans-serif;
+        line-height: 29px;
+        color: darkslategray;
+        font-size: 1.5rem;
+    }
+
+    #input_file{
+        display: none;
+    }
+
+    /* Thumbnail */
+    .thumbnail{
+        width: 80px;
+        height: 80px;
+        padding: 2px;
+        border: 2px solid lightgray;
+        border-radius: 3px;
+        float: left;
+    }
+
+    .size{
+        font-size:12px;
+    }
+    .clear-button {
+      display: none;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+    }
+
+    .clear-button:hover {
+      background-color: #A41E43;
+      color: #fff;
+    }
+
+    .or {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
 </style>
 
 </head>
@@ -88,10 +154,16 @@
               <label for="exampleFormControlTextarea1">Urls (each in new line):</label>
               <textarea class="form-control" id="urlsToCrawl" rows="5"></textarea>
             </div>
-            OR
+            <span class="or">OR</span>  
             <div class="form-group">
-              <label for="text-file">Upload text file:</label>
+              <!-- <label for="text-file">Upload text file:</label> -->
               <input type="file" id="input_file">
+
+                    <!-- Drag and Drop container-->
+                  <div class="upload-area"  id="uploadfile">
+                    <button class="clear-button">X</button>
+                    <h1>Drag and Drop file here<br/>Or<br/>Click to select file</h1>
+                </div>
             </div>
             </div>
         </div>
@@ -102,7 +174,7 @@
             <label for="zip" data-toggle="tooltip" title="Recommended value is 3, shallower crawl may not give accurate result, while deeper crawl will take longer to finish.">Crawling depth:</label>
             <input type="number" value="1" class="form-control" min="0" max="999" id="hops" placeholder="0" required="">
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-md-9 mb-3">
             <label for="zip">Job name:</label>
             <input type="text" class="form-control" id="titleOfJob" placeholder="" required="">
             <small>Alphanumeric symbols only</small>
@@ -113,12 +185,12 @@
 
         
         <hr class="mb-4">
-        <button class="btn btn-primary btn-lg btn-block" id="start-crawling" type="submit">Start crawling</button>
+        <button class="btn btn-primary btn-lg" id="start-crawling" type="submit">Start crawling</button>
       </form>
     </div>
   </div>
 
-  <div class="col-md-10 offset-1" id="latest_results_wrapper">
+  <div class="col-md-10 offset-1 mt-1" id="latest_results_wrapper">
     <a href="#" id="latest_results">Get latest results</a>
 </div>
 
@@ -181,6 +253,15 @@ crossorigin="anonymous"></script>
                 //var serverUrl = "http://127.0.0.127:8989";
                 var serverUrl = "";
 
+                 // preventing page from redirecting
+                $("html").on("dragover", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $("h1").text("Drag here");
+                });
+
+                $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
+
                   var get_crawl_progress_status = function(){
                     const url = serverUrl + "/score?q=get_crawl_progress_status";
                       $.ajax({
@@ -198,6 +279,7 @@ crossorigin="anonymous"></script>
                                 $(".error-alert").html(res.message);
                                 $(".error-alert").show();
                                 $("#crawling-form :input").prop("disabled", false);
+                                $(".upload-area").prop("draggable", true);
                               } else if(res.status === "ready") {
                                   // crawling finished
                                   clearInterval(handle); 
@@ -207,12 +289,14 @@ crossorigin="anonymous"></script>
                                   $(".error-alert").hide();
                                   crawling_in_progress = 0;
                                   $("#crawling-form :input").prop("disabled", false);
+                                  $(".upload-area").prop("draggable", true);
                               } else if(res.status === "stopping") {
                                   $(".status-alert").show();
                                   $(".done-alert").hide();
                                   $(".error-alert").hide();
                                   crawling_in_progress = 1;
                                   $("#crawling-form :input").prop("disabled", true);
+                                  $(".upload-area").prop("draggable", false);
                                   clearInterval(handle); 
                                   handle = 0;
                                   refresh_stats();
@@ -220,6 +304,7 @@ crossorigin="anonymous"></script>
                                 // crawling
                                 crawling_in_progress = 1;
                                 $("#crawling-form :input").prop("disabled", true);
+                                $(".upload-area").prop("draggable", false);
                                 $(".status-alert").show();
                                 $(".done-alert").hide();
                                 $(".error-alert").hide();
@@ -312,13 +397,25 @@ crossorigin="anonymous"></script>
                       const urlsToCrawl = $("#urlsToCrawl").val();
                       const hops = $("#hops").val();
                       const titleOfJob = $("#titleOfJob").val(); 
-                      const inputFile = $("#input_file").val(); 
+                      const inputFile = $("#input_file")[0].files[0];
+
+                      var fd = new FormData();
+                      fd.append('input_file', inputFile); //, $("#input_file").val());
+                      fd.append('urls', urlsToCrawl);
+                      fd.append('hops', hops);
+                      fd.append('titleOfJob', titleOfJob);
+
                       if (titleOfJob !== "") {
                         $("#crawling-form :input").prop("disabled", true);
+                        $(".upload-area").prop("draggable", false);
                         $.ajax({
-                              type: "POST",
+                              method: "POST",
                               url: url,
-                              data: {urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob, input_file: inputFile},
+                              data: fd, //{urls: urlsToCrawl, hops: hops, titleOfJob:titleOfJob, input_file: inputFile},
+                              timeout: 0,
+                              processData: false,
+                              mimeType: "multipart/form-data",
+                              contentType: false,
                               success: ((res)=>{
                                 get_crawl_progress_status();
                                 if(handle === 0) {
@@ -361,6 +458,62 @@ crossorigin="anonymous"></script>
                     }));
 
                     //latest_results
+
+
+
+
+
+
+                    // Drag enter
+                    $('.upload-area').on('dragenter', function (e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        $("h1").text("Drop");
+                    });
+
+                    // Drag over
+                    $('.upload-area').on('dragover', function (e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        $("h1").text("Drop file");
+                    });
+
+                    // Drop
+                    $('.upload-area').on('drop', function (e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        $("#urlsToCrawl").prop("disabled", true);
+
+                        var file = e.originalEvent.dataTransfer.files;
+                        $("#input_file").prop("files", file);
+                        $("h1").html("File <b>"+file[0].name+"</b> selected for uploading");
+                        $(".clear-button").show();
+                    });
+
+                    $('.clear-button').on('click', function (e) { 
+                      e.stopPropagation();
+                        e.preventDefault();
+                      $("#input_file").val('');
+                      $(".clear-button").hide();
+                      $("#urlsToCrawl").prop("disabled", false);
+                      $("h1").html("Drag and Drop file here<br/>Or<br/>Click to select file");
+                    });
+
+                    // Open file selector on div click
+                    $("#uploadfile").click(function(){
+                        $("#input_file").click();
+                    });
+
+                    // file selected
+                    $("#input_file").change(function(e){
+                      $("#urlsToCrawl").prop("disabled", true);
+
+                        var file = $("#input_file")[0].files[0];
+                        $("h1").html("File <b>"+file.name+"</b> selected for uploading");
+                        $(".clear-button").show();
+
+                    });
               });
 
       </script>
