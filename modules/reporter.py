@@ -9,6 +9,8 @@ import logging
 
 def get_language_balance(langs:dict) -> float:
     lang_count = len(langs) 
+    if lang_count == 0:
+        return 0
     largest = max(langs, key=langs.get)
     largest_value = langs.get(largest, 1)
     if lang_count < 1 or largest_value < 1:

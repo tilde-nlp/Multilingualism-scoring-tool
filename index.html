@@ -151,7 +151,7 @@
           <div class="col-md-12 mb-3">
             
             <div class="form-group">
-              <label for="exampleFormControlTextarea1">Urls (each in new line):</label>
+              <label for="exampleFormControlTextarea1" data-toggle="tooltip" title="Urls used as seed list for crawling. Use one URL per line. Multiple starting adrresses for a domain allowed. Please specify URL scheme (http:// or https://). Subdomains will be crawled as belonging to the same domain.">Urls (each in new line):</label>
               <textarea class="form-control" id="urlsToCrawl" rows="5"></textarea>
             </div>
             <span class="or">OR</span>  
@@ -160,7 +160,7 @@
               <input type="file" id="input_file">
 
                     <!-- Drag and Drop container-->
-                  <div class="upload-area"  id="uploadfile">
+                  <div class="upload-area"  id="uploadfile" data-toggle="tooltip" title="Please provide txt file with URLs. Use one URL per line. Multiple starting adrresses for a domain allowed. Please specify URL scheme (http:// or https://). Subdomains will be crawled as belonging to the same domain.">
                     <button class="clear-button">X</button>
                     <h1>Drag and Drop file here<br/>Or<br/>Click to select file</h1>
                 </div>
@@ -175,7 +175,7 @@
             <input type="number" value="1" class="form-control" min="0" max="999" id="hops" placeholder="0" required="">
           </div>
           <div class="col-md-9 mb-3">
-            <label for="zip">Job name:</label>
+            <label for="zip" data-toggle="tooltip" title="Specify job name. This name will be used for file download. Only letters and numbers allowed, no spaces.">Job name:</label>
             <input type="text" class="form-control" id="titleOfJob" placeholder="" required="">
             <small>Alphanumeric symbols only</small>
           </div>
@@ -201,15 +201,15 @@
       <table class="table table-sm crawling-data">
         <thead>
           <tr>
-            <th scope="col">Url</th>
-            <th scope="col">Normalised Language balance (Score)</th>
-            <th scope="col">LDI pages</th>
-            <th scope="col">LDI words</th>
-            <th scope="col">Language balance</th>
-            <th scope="col">Language balance EU24</th>
-            <th scope="col">Language balance EU24+is,no</th>
-            <th scope="col">Coverage EU24</th>
-            <th scope="col">Coverage EU24+is,no</th>
+            <th scope="col" data-toggle="tooltip" title="Domains detected from seed URL">Url</th>
+            <th scope="col" data-toggle="tooltip" title="Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).">Normalised Language balance (Score)</th>
+            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using HTML pages as unit.">LDI pages</th>
+            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using words as unit.">LDI words</th>
+            <th scope="col" data-toggle="tooltip" title="Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.">Language balance</th>
+            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using only EU24 languages.">Language balance EU24</th>
+            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using EU24 plus Icelandic and Norwegian languages.">Language balance EU24+is,no</th>
+            <th scope="col" data-toggle="tooltip" title="How many of EU24 languages are represented in this website.">Coverage EU24</th>
+            <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no</th>
             <!-- <th scope="col">Language count</th> -->
             <!-- <th scope="col">Languages</th> -->
             <!-- <th scope="col">Words per language</th> -->
