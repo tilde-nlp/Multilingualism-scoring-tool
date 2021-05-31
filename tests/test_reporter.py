@@ -71,6 +71,7 @@ class TestReporter(unittest.TestCase):
         report_config = configparser.ConfigParser()
         report_config['reporter'] = {} 
         report_config['reporter']['PRIMARY_LANGUAGES'] = 'bg cs da de el en es et fi fr ga hr hu it lt lv mt nl pl pt ro sk sl sv' # EU24
+        report_config['reporter']['EXTENDED_LANGUAGES'] = 'ru ' 
         reporter = Reporter(existing_dir, report_config)
         # "time \t url \t html_lang \t detected_lang \t depth \t num_words \n"
         simple_content = [
@@ -94,6 +95,7 @@ class TestReporter(unittest.TestCase):
         self.assertEqual(stats['lang_count'], 7) 
         self.assertAlmostEqual(stats['language_balance'], 0.31, places=2) # (1+0.16+0.16+0.16+0.16+0.16+0.333)/7
         self.assertAlmostEqual(stats['language_balance_primary'], 0.33, places=2) # (1+0.16+0.16+0.16+0.16)/5
+        self.assertAlmostEqual(stats['language_balance_extended'], 0.305, places=2) # (1+0.16+0.16+0.16+0.16+0.16)/6
         score = reporter.get_score("existing.domain") # 0.33333*5/24 = 0.0694
         self.assertAlmostEqual(stats['LDI_pages'], 0.73, places=2) # 1-(0.6^+0.1^+0.1^+0.1^+0.1^) = 0.4
         os.remove(os.path.join(existing_dir, 'existing_domain.tsv'))

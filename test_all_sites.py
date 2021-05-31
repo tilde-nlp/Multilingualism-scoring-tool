@@ -181,10 +181,37 @@ class TestSpider(unittest.TestCase):
         self.assertEqual(response['status'], "ready")
         self.assertEqual(response['message'], "ready") 
 
+
         response = scorer.get_current_stats()
-        score, stats = response['127.0.0.4']
+        score, stats = response['127.0.0.1']
         self.assertEqual(score, '4.17') # 1 * 1 / 24 # pl balance 1/24 eu langs
+        score, stats = response['127.0.0.2'] # lv, en. should be between 4,17-8.34
+        self.assertGreaterEqual(float(score), 4.17)
+        self.assertLessEqual(float(score), 8.34)
+
+        score, stats = response['127.0.0.3']
+        self.assertEqual(score, '4.17') # monolingual - latvian
+
+        score, stats = response['127.0.0.4']
+        self.assertEqual(score, '4.17') # monolingual - polish 1 * 1 / 24 = 4.17
+
         score, stats = response['127.0.0.5']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.6']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.7']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.8']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.9']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.10']
+        self.assertNotEqual(score, '0.00')
+        score, stats = response['127.0.0.11']
+        self.assertEqual(score, '0.00') # Restricted by robots.txt
+        score, stats = response['127.0.0.12']
+        self.assertEqual(score, '0.00') # Content served using js
+        score, stats = response['127.0.0.13']
         self.assertNotEqual(score, '0.00')
 
         httpd.shutdown()

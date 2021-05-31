@@ -42,7 +42,7 @@
       display: none;
     }
 
-    #download_results_wrapper {
+    .download_results_wrapper {
       display: none;
     }
 
@@ -202,16 +202,21 @@
         <thead>
           <tr>
             <th scope="col">Url</th>
-            <th scope="col">Normalised Language balance</th>
-            <th scope="col">LDI_pages</th>
-            <th scope="col">LDI_words</th>
-            <th scope="col">Language count</th>
-            <th scope="col">Languages</th>
-            <th scope="col">Words per language</th>
-            <th scope="col">Total pages</th>
-            <th scope="col">Total words</th>
-            <th scope="col">Pages w/o language</th>
-            <th scope="col">Words in pages w/o language</th>
+            <th scope="col">Normalised Language balance (Score)</th>
+            <th scope="col">LDI pages</th>
+            <th scope="col">LDI words</th>
+            <th scope="col">Language balance</th>
+            <th scope="col">Language balance EU24</th>
+            <th scope="col">Language balance EU24+is,no</th>
+            <th scope="col">Coverage EU24</th>
+            <th scope="col">Coverage EU24+is,no</th>
+            <!-- <th scope="col">Language count</th> -->
+            <!-- <th scope="col">Languages</th> -->
+            <!-- <th scope="col">Words per language</th> -->
+            <!-- <th scope="col">Total pages</th> -->
+            <!-- <th scope="col">Total words</th> -->
+            <!-- <th scope="col">Pages w/o language</th> -->
+            <!-- <th scope="col">Words in pages w/o language</th> -->
           </tr>
         </thead>
         <tbody>
@@ -221,10 +226,14 @@
     </div>
   </div>
 
-  <div class="col-md-10 offset-1" id="download_results_wrapper">
+  <div class="col-md-10 offset-1 download_results_wrapper">
       <hr class="mb-4">
       <a href="score?q=download_results">Download results</a>
   </div>
+  <div class="col-md-10 offset-1 download_results_wrapper">
+    <hr class="mb-4">
+    <a href="score?q=download_detailed_results">Download detailed results</a>
+</div>
 
   <footer class="my-5 pt-5 text-muted text-center text-small">
     <p class="mb-1">© 2021 Tilde <img class="inline-logo" src="https://tilde.com/themes/custom/drupal8_zymphonies_theme/logo.svg" alt=""> </p>
@@ -339,28 +348,28 @@ crossorigin="anonymous"></script>
                                   tablerow += "<td>"+dataRow[1]+"</td>";
                                   tablerow += "<td>"+dataRow[2].LDI_pages+"</td>";
                                   tablerow += "<td>"+dataRow[2].LDI_words+"</td>";
-                                  tablerow += "<td>"+dataRow[2].lang_count+"</td>";
-                                  tablerow += "<td>";
-                                    for (const [key, value] of Object.entries(dataRow[2].langs)) {
-                                      tablerow += "<span>"+key+":</span> <span>"+value+"</span><br>";
-                                    }
-                                    tablerow += "</td>";
-                                  
-                                    tablerow += "<td>"
-                                      
-                                      // if (dataRow[2].langs_words) {
-                                        for (const [key, value] of Object.entries(dataRow[2].langs_words)) {
-                                      tablerow += "<span>"+key+":</span> <span>"+value+"</span><br>";
-                                    }
-                                      // }
-                                    
-                                      
-                                      
-                                      tablerow += "</td>";
-                                    tablerow += "<td>"+dataRow[2].total_pages+"</td>";
-                                    tablerow += "<td>"+dataRow[2].total_words+"</td>";
-                                    tablerow += "<td>"+dataRow[2].wo_lang_pages+"</td>";
-                                    tablerow += "<td>"+dataRow[2].wo_lang_words+"</td>";
+                                  tablerow += "<td>"+dataRow[2].language_balance+"</td>";
+                                  tablerow += "<td>"+dataRow[2].language_balance_primary+"</td>";
+                                  tablerow += "<td>"+dataRow[2].language_balance_extended+"</td>";
+                                  tablerow += "<td>"+dataRow[2].coverage_primary+"</td>";
+                                  tablerow += "<td>"+dataRow[2].coverage_extended+"</td>";
+                                  // tablerow += "<td>"+dataRow[2].lang_count+"</td>";
+                                  // tablerow += "<td>";
+                                  //   for (const [key, value] of Object.entries(dataRow[2].langs)) {
+                                  //     tablerow += "<span>"+key+":</span> <span>"+value+"</span><br>";
+                                  //   }
+                                  //   tablerow += "</td>";
+                                  //   tablerow += "<td>"
+                                  //     // if (dataRow[2].langs_words) {
+                                  //       for (const [key, value] of Object.entries(dataRow[2].langs_words)) {
+                                  //     tablerow += "<span>"+key+":</span> <span>"+value+"</span><br>";
+                                  //   }
+                                  //     // }
+                                  //     tablerow += "</td>";
+                                  //   tablerow += "<td>"+dataRow[2].total_pages+"</td>";
+                                  //   tablerow += "<td>"+dataRow[2].total_words+"</td>";
+                                  //   tablerow += "<td>"+dataRow[2].wo_lang_pages+"</td>";
+                                  //   tablerow += "<td>"+dataRow[2].wo_lang_words+"</td>";
                                   tablerow += "</tr>";
 
                                   dataTable += tablerow;
@@ -372,11 +381,11 @@ crossorigin="anonymous"></script>
 
                                 // get_crawl_progress_status();
                                 $(".crawling-stats").show();
-                                $("#download_results_wrapper").show();
+                                $(".download_results_wrapper").show();
                               } else {
                                 // scoring tool not running
                                 $(".crawling-stats").hide();
-                                $("#download_results_wrapper").hide();
+                                $(".download_results_wrapper").hide();
                               }
                             })
                           });

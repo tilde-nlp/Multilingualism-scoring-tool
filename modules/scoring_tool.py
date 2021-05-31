@@ -6,6 +6,7 @@ import logging
 import time
 from datetime import datetime
 import json
+from collections import OrderedDict
 
 from urllib.parse import urlparse
 # pip install scrapy # Use version 2.4.0 # https://github.com/scrapy/scrapy/blob/master/LICENSE
@@ -40,7 +41,7 @@ class ScoringTool():
         override_default_crawler_config()
 
         self.analyzer_data_dir = self.config.get('analyzer', 'data_dir', fallback='')
-        self.jobtitle = self.config.get('analyzer', 'default_titledata_dir', fallback='')
+        self.jobtitle = self.config.get('analyzer', 'default_job_title', fallback='')
         self.reporter = Reporter(self.analyzer_data_dir, report_config)
         self.p = None
         self.process = None
@@ -117,48 +118,59 @@ class ScoringTool():
         return current_status
 
 
-    def save_results_as(self, title_of_datajob: str) -> str:
+    def get_current_stats_for_display(self, stats_to_display:list) -> dict:
         current_stats = self.get_current_stats()
-        saved_results_dir = self.config.get('app', 'SAVED_RESULTS_DIR', fallback='saved_results') 
+        pretty_stats = OrderedDict()
+        for domain, (score, stats) in current_stats.items():
+            display_stats = OrderedDict()
+            for key in stats_to_display:
+                display_stats[key] = stats.get(key)
+            pretty_stats[domain] = (score, display_stats)
+        return pretty_stats
+
+
+    def save_results_as_json(self) -> str:
+        current_stats = self.get_current_stats()
+        saved_results_dir = self.config.get('app', 'saved_results_dir', fallback='saved_results') 
         os.makedirs(saved_results_dir, exist_ok=True)
         current_date = datetime.today().strftime('%Y%m%d')
-        local_filename = os.path.join(saved_results_dir, f'{title_of_datajob}_{current_date}.json')
+        local_filename = os.path.join(saved_results_dir, f'{self.jobtitle}_{current_date}.json')
         with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
             json.dump(current_stats, saved_res_f)
         return local_filename
 
-    def save_results_as_csv(self, title_of_datajob: str) -> str:
-        current_stats = self.get_current_stats()
-        saved_results_dir = self.config.get('app', 'SAVED_RESULTS_DIR', fallback='saved_results') 
+
+    def save_results_as_csv(self, stats_to_display:list) -> str:
+        saved_results_dir = self.config.get('app', 'saved_results_dir', fallback='saved_results') 
         os.makedirs(saved_results_dir, exist_ok=True)
         current_date = datetime.today().strftime('%Y%m%d')
-        local_filename = os.path.join(saved_results_dir, f'{title_of_datajob}_{current_date}.csv')
+        local_filename = os.path.join(saved_results_dir, f'{self.jobtitle}_{current_date}.csv')
+        current_stats = self.get_current_stats_for_display(stats_to_display)
         with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
             saved_res_f.write(f"domain,score,{','.join(Reporter.roundable_stats)}\n")
             for domain, (score, stats) in current_stats.items():
                 items = [domain, score]
                 for key, value in stats.items():
-                    if key in Reporter.roundable_stats:
-                        items.append(value) 
+                    items.append(value) 
                 csv_row = ",".join(items)
                 saved_res_f.write(f"{csv_row}\n")
         return local_filename
 
 
-
-    def start_crawl(self, urls: list, hops:int, jobtitle:str="scoring") -> dict:
+    def start_crawl(self, urls: list, hops:int, jobtitle:str="") -> dict:
         if self.status in ["crawling", "stopping"]:
             current_status = {}
             current_status["status"] = "error" 
             current_status["message"] = "Can not start, already crawling."
             return current_status
-        if not is_ok_job_name(jobtitle):
+        if jobtitle and not is_ok_job_name(jobtitle):
             response = {}
             response["status"] = "error" 
             response["message"] = "Only letters and numbers allowed in job title."
             self.logger.debug(f"title was not alphanumeric: {jobtitle}")
             return response
-        self.jobtitle = jobtitle
+        if jobtitle:
+            self.jobtitle = jobtitle
         def verify_and_try_to_fix_urls(urls: list) -> list:
             stripped_urls = [url.strip() for url in urls if url.strip()]
             fixed_urls = []

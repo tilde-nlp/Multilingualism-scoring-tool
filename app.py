@@ -19,10 +19,21 @@ from modules.scoring_tool import ScoringTool
 from modules.scoring_tool import *
 from modules.common_functions import is_ok_job_name
 
+
+
 class ScoringHandler(tornado.web.RequestHandler):
     def initialize(self, scorer):
         self.scorer = scorer
         self.logger = logging.getLogger("ScoringHandler")
+        self.stats_to_display = [
+            'LDI_pages',
+            'LDI_words',
+            'language_balance',
+            'language_balance_primary',     # 'language_balance24',
+            'language_balance_extended',    # 'language_balance26',
+            'coverage_primary',             # 'coverage24'
+            'coverage_extended',            # 'coverage26'
+        ]
 
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -32,12 +43,19 @@ class ScoringHandler(tornado.web.RequestHandler):
     def get(self):
         q = self.get_query_argument("q", "", False)
         if q == "download_results":
-            local_file = self.scorer.save_results_as_csv(self.scorer.jobtitle)
-            # save_results_as(title_of_datajob)
+            local_file = self.scorer.save_results_as_csv(self.stats_to_display)
             content_type, _ = guess_type(local_file)
             self.logger.debug(f"Saved file content type is {content_type}")
             self.add_header('Content-Type', content_type)
             self.add_header('Content-Disposition', f'attachment; filename="{Path(local_file).name}"') 
+            with open(local_file) as source_file:
+                self.write(source_file.read())
+        elif q == "download_detailed_results":
+            local_file = self.scorer.save_results_as_json()
+            content_type, _ = guess_type(local_file)
+            self.logger.debug(f"Saved file content type is {content_type}")
+            self.add_header('Content-Type', content_type)
+            self.add_header('Content-Disposition', f'attachment; filename="{Path(local_file).name}"')
             with open(local_file) as source_file:
                 self.write(source_file.read())
         else:
@@ -74,8 +92,10 @@ class ScoringHandler(tornado.web.RequestHandler):
             response = self.scorer.get_crawl_progress_status()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "get_current_scores":
+            # Return pretty columns with metrics for display;
+            # technical info provided by download_detailed_results link.
             self.logger.debug(f"Server received get_current_scores request")
-            response = self.scorer.get_current_stats()
+            response = self.scorer.get_current_stats_for_display(self.stats_to_display)
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "stop_crawl":
             self.logger.debug(f"Server received stop_crawl request")
