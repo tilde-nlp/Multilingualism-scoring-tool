@@ -95,7 +95,8 @@ class ScoringHandler(tornado.web.RequestHandler):
             # Return pretty columns with metrics for display;
             # technical info provided by download_detailed_results link.
             self.logger.debug(f"Server received get_current_scores request")
-            response = self.scorer.get_current_stats_for_display(self.stats_to_display)
+            # response = self.scorer.get_current_stats_for_display(self.stats_to_display)
+            response = self.scorer.get_current_stats()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
         elif q == "stop_crawl":
             self.logger.debug(f"Server received stop_crawl request")
