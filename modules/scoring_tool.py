@@ -99,6 +99,8 @@ class ScoringTool():
             current_status["message"] = "No stats - nothing to analyze. Maybe scoring tool not yet initialized?"
             return current_status
 
+        job_score = 0
+        nonzero_domains = 0 # Domains with score 0 excluded
 
         for domain in self.allowed_domains:
             try:
@@ -109,14 +111,21 @@ class ScoringTool():
             # stats: 'language_balance', 'lang_count', 'langs', # For full list see Reporter
             score = self.reporter.get_score_from_stats(stats)
             score = score * 100
+            if score > 0:
+                job_score = job_score + score
+                nonzero_domains = nonzero_domains + 1
             score = "{:0.2f}".format(score)
             for key, value in stats.items(): 
                 if key in Reporter.roundable_stats: # Convert to 0-100%
                     value = value * 100
                     stats[key] = "{:0.2f}".format(value)
             current_status[domain] = (score, stats)
+        if nonzero_domains > 0:
+            job_score = job_score / nonzero_domains
+        job_score = "{:0.2f}".format(job_score)
+        # current_status["job_score"] = job_score
         return current_status
-
+       
 
     def get_current_stats_for_display(self, stats_to_display:list) -> dict:
         current_stats = self.get_current_stats()
@@ -192,6 +201,7 @@ class ScoringTool():
         self.settings['DEPTH_LIMIT'] = hops
 
         self.allowed_domains = [extractDomain(i) for i in self.urls]
+        self.allowed_domains = list(set(self.allowed_domains))
         # print(f'\nPrepared allowed_domains {allowed_domains}\n')
 
         def dump_config_to_file_for_debug():

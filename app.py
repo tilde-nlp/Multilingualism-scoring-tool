@@ -102,6 +102,12 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(f"Server received stop_crawl request")
             response = self.scorer.stop_crawl()
             self.write(json.dumps(response, indent=2, ensure_ascii=False))
+        elif q == "list_previous_jobs":
+            self.logger.debug(f"Server received list_previous_jobs request")
+        elif q == "view_job_scores":
+            job_id = self.get_body_argument("job_id", default=None, strip=False)
+            self.logger.debug(f"Server received view_job_scores request for {job_id}")
+
         elif q == "quit":
             self.write(json.dumps("Exiting", indent=2, ensure_ascii=False))
             self.logger.debug(f"Server received quit request")

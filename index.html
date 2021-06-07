@@ -208,8 +208,9 @@
             <th scope="col" data-toggle="tooltip" title="Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.">Language balance</th>
             <th scope="col" data-toggle="tooltip" title="Language balance, calculated using only EU24 languages.">Language balance EU24</th>
             <th scope="col" data-toggle="tooltip" title="Language balance, calculated using EU24 plus Icelandic and Norwegian languages.">Language balance EU24+is,no</th>
-            <th scope="col" data-toggle="tooltip" title="How many of EU24 languages are represented in this website.">Coverage EU24</th>
             <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no</th>
+            <!-- <th scope="col" data-toggle="tooltip" title="How many of EU24 languages are represented in this website.">Coverage EU24</th> -->
+            <!-- <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no</th> -->
             <!-- <th scope="col">Language count</th> -->
             <!-- <th scope="col">Languages</th> -->
             <!-- <th scope="col">Words per language</th> -->
@@ -351,8 +352,9 @@ crossorigin="anonymous"></script>
                                   tablerow += "<td>"+dataRow[2].language_balance+"</td>";
                                   tablerow += "<td>"+dataRow[2].language_balance_primary+"</td>";
                                   tablerow += "<td>"+dataRow[2].language_balance_extended+"</td>";
-                                  tablerow += "<td>"+dataRow[2].coverage_primary+"</td>";
-                                  tablerow += "<td>"+dataRow[2].coverage_extended+"</td>";
+                                  tablerow += "<td>"+dataRow[2].covered_extended+"</td>";
+                                  // tablerow += "<td>"+dataRow[2].coverage_primary+"</td>";
+                                  // tablerow += "<td>"+dataRow[2].coverage_extended+"</td>";
                                   // tablerow += "<td>"+dataRow[2].lang_count+"</td>";
                                   // tablerow += "<td>";
                                   //   for (const [key, value] of Object.entries(dataRow[2].langs)) {

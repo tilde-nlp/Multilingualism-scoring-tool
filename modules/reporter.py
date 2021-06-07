@@ -62,7 +62,9 @@ class Reporter():
             'wo_lang_pages':0,
             'wo_lang_words':0,
             'coverage_primary':0,
+            'covered_primary':"0/0",
             'coverage_extended':0,
+            'covered_extended':"0/0",
         }
         if not os.path.exists(self.data_dir):
             self.logger.log(logging.ERROR,f"Could not find data dir: {self.data_dir}")
@@ -122,7 +124,9 @@ class Reporter():
                 coverage_extended = coverage_extended + 1
         count_primary_langs = len(self.primary_langs) if len(self.primary_langs) > 0 else 1 # avoid /0 
         count_extended_langs = len(self.extended_langs) if len(self.extended_langs) > 0 else 1
+        stats['covered_primary'] = f"{coverage_primary}/{count_primary_langs}"
         stats['coverage_primary'] = coverage_primary/count_primary_langs
+        stats['covered_extended'] = f"{coverage_extended}/{count_extended_langs}"
         stats['coverage_extended'] = coverage_extended/count_extended_langs
 
         stats['language_balance'] = get_language_balance(langs)
