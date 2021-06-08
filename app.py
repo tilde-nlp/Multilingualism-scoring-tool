@@ -31,8 +31,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             'language_balance',
             'language_balance_primary',     # 'language_balance24',
             'language_balance_extended',    # 'language_balance26',
-            'coverage_primary',             # 'coverage24'
-            'coverage_extended',            # 'coverage26'
+            'covered_extended',
         ]
 
     def set_default_headers(self):
@@ -51,7 +50,8 @@ class ScoringHandler(tornado.web.RequestHandler):
             with open(local_file) as source_file:
                 self.write(source_file.read())
         elif q == "download_detailed_results":
-            local_file = self.scorer.save_results_as_json()
+            # local_file = self.scorer.save_results_as_json()
+            local_file = self.scorer.save_results_as_full_csv()
             content_type, _ = guess_type(local_file)
             self.logger.debug(f"Saved file content type is {content_type}")
             self.add_header('Content-Type', content_type)

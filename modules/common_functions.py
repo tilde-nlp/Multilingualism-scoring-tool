@@ -4,8 +4,8 @@ import logging
 import tldextract
 # pip install jusText # BSD 2-Clause License # https://pypi.org/project/jusText/
 import justext 
-from trafilatura.core import extract
-import html_text
+# from trafilatura.core import extract
+# import html_text
 
 
 def is_ok_job_name(job_name:str) -> bool:
@@ -66,22 +66,22 @@ def extractText(response):
     return text
     
 
-# https://github.com/adbar/trafilatura
-# Good F1 measure
-def extractText_trafilatura(response):
-    text = extract(response.text, response.url)
-    text = segmentText(text)
-    if text is None:
-        return ""
-    return text
+# # https://github.com/adbar/trafilatura
+# # Good F1 measure
+# def extractText_trafilatura(response):
+#     text = extract(response.text, response.url)
+#     text = segmentText(text)
+#     if text is None:
+#         return ""
+#     return text
 
-# https://pypi.org/project/html-text/
-# Excellent recall (basically, all text)
-def extractTextHtml2Text(response):
-    text = html_text.extract_text(response.text)
-    text = segmentText(text)
-    return text
-    # >>> html_text.extract_text('<h1>Hello</h1> world!')
-    # 'Hello\n\nworld!'
-    # >>> html_text.extract_text('<h1>Hello</h1> world!', guess_layout=False)
-    # 'Hello world!'
+# # https://pypi.org/project/html-text/
+# # Excellent recall (basically, all text)
+# def extractTextHtml2Text(response):
+#     text = html_text.extract_text(response.text)
+#     text = segmentText(text)
+#     return text
+#     # >>> html_text.extract_text('<h1>Hello</h1> world!')
+#     # 'Hello\n\nworld!'
+#     # >>> html_text.extract_text('<h1>Hello</h1> world!', guess_layout=False)
+#     # 'Hello world!'

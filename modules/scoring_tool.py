@@ -149,6 +149,27 @@ class ScoringTool():
         return local_filename
 
 
+    def save_results_as_full_csv(self) -> str:
+        current_stats = self.get_current_stats()
+        saved_results_dir = self.config.get('app', 'saved_results_dir', fallback='saved_results') 
+        os.makedirs(saved_results_dir, exist_ok=True)
+        current_date = datetime.today().strftime('%Y%m%d')
+        local_filename = os.path.join(saved_results_dir, f'{self.jobtitle}_{current_date}_all.csv')
+        with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
+            # write header
+            (first_score, first_stats) = next(iter(current_stats.values()))
+            saved_res_f.write(f"domain,score,{','.join(first_stats.keys())}\n")
+            # write all domains
+            for domain, (score, stats) in current_stats.items():
+                items = [domain, score]
+                for key, value in stats.items():
+                    items.append(value)
+                items = [str(item).replace(',',';').replace('{','').replace('}','') for item in items]
+                csv_row = ",".join(items)
+                saved_res_f.write(f"{csv_row}\n")
+        return local_filename
+
+
     def save_results_as_csv(self, stats_to_display:list) -> str:
         saved_results_dir = self.config.get('app', 'saved_results_dir', fallback='saved_results') 
         os.makedirs(saved_results_dir, exist_ok=True)
@@ -156,7 +177,7 @@ class ScoringTool():
         local_filename = os.path.join(saved_results_dir, f'{self.jobtitle}_{current_date}.csv')
         current_stats = self.get_current_stats_for_display(stats_to_display)
         with open(local_filename, 'w', encoding='utf-8') as saved_res_f:
-            saved_res_f.write(f"domain,score,{','.join(Reporter.roundable_stats)}\n")
+            saved_res_f.write(f"domain,score,{','.join(stats_to_display)}\n")
             for domain, (score, stats) in current_stats.items():
                 items = [domain, score]
                 for key, value in stats.items():

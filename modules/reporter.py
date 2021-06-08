@@ -124,9 +124,9 @@ class Reporter():
                 coverage_extended = coverage_extended + 1
         count_primary_langs = len(self.primary_langs) if len(self.primary_langs) > 0 else 1 # avoid /0 
         count_extended_langs = len(self.extended_langs) if len(self.extended_langs) > 0 else 1
-        stats['covered_primary'] = f"{coverage_primary}/{count_primary_langs}"
+        stats['covered_primary'] = f"{coverage_primary}"
         stats['coverage_primary'] = coverage_primary/count_primary_langs
-        stats['covered_extended'] = f"{coverage_extended}/{count_extended_langs}"
+        stats['covered_extended'] = f"{coverage_extended}"
         stats['coverage_extended'] = coverage_extended/count_extended_langs
 
         stats['language_balance'] = get_language_balance(langs)
@@ -152,7 +152,7 @@ class Reporter():
         stats['LDI_words'] = 1 - sum_pi_squared_words
         stats['LDI_words'] = stats['LDI_words']
 
-        self.logger.log(logging.INFO,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},language_balance_primary {stats['language_balance_primary']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")
+        self.logger.log(logging.DEBUG,f"Domain {domain}, language count {stats['lang_count']}, language_balance {stats['language_balance']},language_balance_primary {stats['language_balance_primary']},  largest {largest}:{largest_value}, all-{lang_stats_for_debug}, pages with N/A lang:{stats['wo_lang_pages']}, total_pages:{stats['total_pages']}, LDI_pages {stats['LDI_pages']}, LDI_words {stats['LDI_words']}")
 
         return stats
 
@@ -160,7 +160,7 @@ class Reporter():
     def get_score_from_stats(self, stats):
         if stats == None:
             return 0
-        self.logger.log(logging.INFO, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
+        self.logger.log(logging.DEBUG, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
         # factor = 1 if stats['lang_count'] > 1 else 0 # lang_count/26    # If single lang balance == 0 
         # score = factor * stats['language_balance']
         score = stats['language_balance_primary'] * stats['coverage_primary']
