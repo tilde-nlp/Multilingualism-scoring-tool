@@ -62,9 +62,9 @@ class Reporter():
             'wo_lang_pages':0,
             'wo_lang_words':0,
             'coverage_primary':0,
-            'covered_primary':"0/0",
+            'covered_primary':"0",
             'coverage_extended':0,
-            'covered_extended':"0/0",
+            'covered_extended':"0",
         }
         if not os.path.exists(self.data_dir):
             self.logger.log(logging.ERROR,f"Could not find data dir: {self.data_dir}")
