@@ -22,10 +22,15 @@
       border: 1px solid #1e7e34;
     }
 
-    .stop-crawl {
+    .stop-crawl, .stop-crawl:hover {
       background-color: #A41E43;
       border: 1px solid #A41E43;
       display: none;
+    }
+
+    .stop-crawl.stopping, .stop-crawl.stopping:hover {
+      background-color: #007bff;
+      border: 1px solid #007bff;
     }
 
     .crawling-data__wrapper .strong {
@@ -136,6 +141,10 @@
       display: flex;
     align-items: center;
     }
+
+    #crawling-form {
+      display: none;
+    }
 </style>
 
 </head>
@@ -145,7 +154,7 @@
   <div class="py-5 text-center">
     <img class="d-block mx-auto mb-4" src="/images/elrc.png" alt="" width="100" height="100">
     <h2>Multilingualism Scoring Tool.</h2>
-    <p class="lead">Below is a multilinguality tool developed by Tilde. </p>
+    <!-- <p class="lead">Below is a multilinguality tool developed by Tilde. </p> -->
   </div>
 
   <div class="row crawling-data">
@@ -156,9 +165,9 @@
         Crawling is ongoing. Average score <span class="average_score"></span>
       </div> -->
 
-      <div class="alert alert-secondary justify-content-between align-items-center done-alert" role="alert">
+      <!-- <div class="alert alert-secondary justify-content-between align-items-center done-alert" role="alert">
         Crawling finished.
-       </div>
+       </div> -->
 
        <div class="alert alert-secondary justify-content-between align-items-center error-alert" role="alert"></div>
 
@@ -166,7 +175,7 @@
       <form id="crawling-form" class="needs-validation" novalidate="">
         <h4 class="mb-3">Crawling data</h4>
         <div class="row">
-          <div class="col-md-12 mb-3">
+          <div class="col-md-12 mb-1">
             
             <div class="form-group">
               <label for="exampleFormControlTextarea1" data-toggle="tooltip" title="Urls used as seed list for crawling. Use one URL per line. Multiple starting adrresses for a domain allowed. Please specify URL scheme (http:// or https://). Subdomains will be crawled as belonging to the same domain.">Urls (each in new line):</label>
@@ -202,7 +211,7 @@
 
 
         
-        <hr class="mb-4">
+        <hr>
       </form>
       <button class="btn btn-primary btn-lg" id="start-crawling" type="submit">Start crawling</button>
       <button class="btn btn-primary btn-lg stop-crawl" type="submit">Stop crawling</button>
@@ -344,19 +353,22 @@ crossorigin="anonymous"></script>
                                   crawling_in_progress = 1;
                                   $("#crawling-form :input").prop("disabled", true);
                                   $("#crawling-form").slideUp();
-                                  $(".stop-crawl").show();
+                                  $(".stop-crawl").show().text("Stopping...").prop("disabled", true);
                                   $("#start-crawling").hide();
 
                                   $(".upload-area").prop("draggable", false);
-                                  clearInterval(handle); 
-                                  handle = 0;
+                                  // clearInterval(handle); 
+                                  // handle = 0;
                                   refresh_stats();
+                                  if(handle === 0) {
+                                    startInterval();
+                                  }
                               } else {
                                 // crawling
                                 crawling_in_progress = 1;
                                 $("#crawling-form :input").prop("disabled", true);
                                 $("#crawling-form").slideUp();
-                                $(".stop-crawl").show();
+                                $(".stop-crawl").show().text("Stop crawling").prop("disabled", false).removeClass("stopping");
                                 $("#start-crawling").hide();
                                 $(".upload-area").prop("draggable", false);
                                 $(".status-alert").show();
@@ -451,12 +463,16 @@ crossorigin="anonymous"></script>
                           });
                   }
 
-                  get_crawl_progress_status();
 
                   var startInterval = function(){
                     handle = setInterval(function(){ 
                       get_crawl_progress_status();
                     }, 5000);
+                  }
+
+                  get_crawl_progress_status();
+                  if(handle === 0) {
+                      startInterval();
                   }
 
                     $("#start-crawling").on("click", ((event)=>{
@@ -477,7 +493,7 @@ crossorigin="anonymous"></script>
                       if (titleOfJob !== "") {
                         $("#crawling-form :input").prop("disabled", true);
                         $("#crawling-form").slideUp();
-                        $(".stop-crawl").show();
+                        $(".stop-crawl").show().text("Stop crawling").prop("disabled", false).removeClass("stopping");
                         $("#start-crawling").hide();
                         $(".upload-area").prop("draggable", false);
 
@@ -509,6 +525,7 @@ crossorigin="anonymous"></script>
 
                     $(".stop-crawl").on("click", ((event)=>{
                       event.preventDefault();
+                      $(".stop-crawl").text("Stopping...").prop("disabled", true).addClass("stopping");
                       const url = serverUrl + "/score?q=stop_crawl";
                       $.ajax({
                               type: "POST",
