@@ -277,23 +277,19 @@
     <div id="help">
       <div class="term">
         <div class="name">Url</div>
-        <div class="description">Domains detected from seed URL</div>
-      </div>
-      <div class="term">
-        <div class="name">Normalised Language balance (Score)</div>
-        <div class="description">Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).</div>
+        <div class="description">Domains detected from seed URLs. Detection of domains is performed by splitting each URL into parts and using domain parts together with top-level domain suffix to construct a common "domain name". This way both "de.example.com" and "fr.example.com" are assigned to the same domain "example.com". On the other hand, using this approach "example.de" and "example.fr" are evaluated as two separate websites.</div>
       </div>
       <div class="term">
         <div class="name">Lieberson’s diversity index</div>
-        <div class="description">A widely used index of linguistic diversity is Lieberson’s diversity index (LDI) (Lieberson 1981). It is defined as: <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where Pi represents the share of i-th language speakers in a community. LDI is 0 if community speaks one language , while higher LDI means larger linguistic diversity.</div>
+        <div class="description">A widely used index of linguistic diversity is Lieberson’s diversity index (LDI) (Lieberson 1981). It is defined as: <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents the share of i-th language speakers in a community. LDI is 0 if community speaks one language , while higher LDI means larger linguistic diversity. As implemented in the tool, LDI represents how content is distributed in various languages and how many languages are present on a site. When content is in one dominant language, LDI is 0, and as count of documents in various languages increases, LDI approaches 1 (or 100%, as displayed by tool). We calculate LDI both on per-page (in this case P<sub>i</sub> represents share of pages in i-th language) and per-word (in this case P<sub>i</sub> represents share of words in i-th language) basis to detect situation when text in dominant language is long, while in other languages text may be shorter (e.g., only summaries).</div>
       </div>
       <div class="term">
         <div class="name">LDI pages</div>
-        <div class="description">Lieberson's diversity index calculated using HTML pages as unit.</div>
+        <div class="description">Lieberson's diversity index calculated using HTML pages as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of pages in i-th language</div>
       </div>
       <div class="term">
         <div class="name">LDI words</div>
-        <div class="description">Lieberson's diversity index calculated using words as unit.</div>
+        <div class="description">Lieberson's diversity index calculated using words as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of words in i-th language</div>
       </div>
       <div class="term">
         <div class="name">Language balance</div>
@@ -306,6 +302,10 @@
       <div class="term">
         <div class="name">Language balance EU24+is,no</div>
         <div class="description">Language balance, calculated using EU24 plus Icelandic and Norwegian languages.</div>
+      </div>
+      <div class="term">
+        <div class="name">Normalised Language balance (Score)</div>
+        <div class="description">Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).</div>
       </div>
       <div class="term">
         <div class="name">Coverage EU24+is,no</div>
