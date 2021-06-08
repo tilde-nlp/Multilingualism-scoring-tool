@@ -73,10 +73,10 @@ class ScoringTool():
                 self.status = "ready"
             elif len(self.process.crawlers) > 0 and self.status=="stopping":
                 self.status = "stopping"
-            elif self.p.is_alive():
-                self.status = "stopping"
             elif len(self.process.crawlers) > 0:
                 self.status = "crawling"
+            elif self.p.is_alive():
+                self.status = "stopping"
             else:
                 self.status = "ready"
         except Exception as e:
