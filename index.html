@@ -33,6 +33,10 @@
       border: 1px solid #007bff;
     }
 
+    .table thead th {
+      position: relative;
+    }
+
     .crawling-data__wrapper .strong {
       font-weight: 600;
     }
@@ -128,7 +132,7 @@
     .or {
       display: flex;
       justify-content: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.3rem;
     }
 
     .job-error {
@@ -145,15 +149,61 @@
     #crawling-form {
       display: none;
     }
+
+    .help-anchor {
+      background-color: #d5d5d5;
+      border-radius: 50%;
+      width: 17px;
+      display: inline-block;
+      color: #fff;
+      display: inline-flex;
+      justify-content: center;
+      font-size: 0.7rem;
+      margin-left: 0.2rem;
+      position: absolute;
+      top: 9px;
+      right: 5px;
+    }
+
+    .help-anchor:hover {
+      color: #fff;
+      background-color: grey;
+    }
+
+    #help {
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .term{
+      margin-bottom: 0.1rem;
+    }
+
+    .term .name{
+      font-weight: 700;
+    }
+
+    .term .description:before{
+      content: "-";
+      width: 10px;
+      display: inline-block;
+    }
+
+    .help-line {
+      width: 100px;
+      text-align: left;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
 </style>
 
 </head>
   <body class="bg-light">
     
 <div class="container">
-  <div class="py-5 text-center">
-    <img class="d-block mx-auto mb-4" src="/images/elrc.png" alt="" width="100" height="100">
-    <h2>Multilingualism Scoring Tool.</h2>
+  <div class="pt-4 pb-4 text-center">
+    <img class="d-block mx-auto mb-3" src="/images/elrc.png" alt="" width="100" height="100">
+    <h2>Multilingualism Scoring Tool</h2>
     <!-- <p class="lead">Below is a multilinguality tool developed by Tilde. </p> -->
   </div>
 
@@ -177,7 +227,7 @@
         <div class="row">
           <div class="col-md-12 mb-1">
             
-            <div class="form-group">
+            <div class="form-group mb-1">
               <label for="exampleFormControlTextarea1" data-toggle="tooltip" title="Urls used as seed list for crawling. Use one URL per line. Multiple starting adrresses for a domain allowed. Please specify URL scheme (http:// or https://). Subdomains will be crawled as belonging to the same domain.">Urls (each in new line):</label>
               <textarea class="form-control" id="urlsToCrawl" rows="5"></textarea>
             </div>
@@ -224,28 +274,25 @@
 
   <div class="row crawling-stats">
     <div class="col-md-10 offset-1">
-      <h4 class="mb-5 mt-5 current-crawl-title">
+      <h4 class="mb-3 mt-5 current-crawl-title">
         <span class="status-alert">
           <img src="/images/loader.gif" alt="">
         </span>
-        Current crawl data. 
-
-
-        Average score: <span class="ml-1 average_score"></span>
-
+        Current crawl results 
       </h4>
+      <h5>Average score: <span class="ml-1 average_score"></span></h5>
 
       <table class="table table-sm crawling-data">
         <thead>
           <tr>
-            <th scope="col" data-toggle="tooltip" title="Domains detected from seed URL">Url</th>
-            <th scope="col" data-toggle="tooltip" title="Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).">Normalised Language balance (Score)</th>
-            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using HTML pages as unit.">LDI pages</th>
-            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using words as unit.">LDI words</th>
-            <th scope="col" data-toggle="tooltip" title="Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.">Language balance</th>
-            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using only EU24 languages.">Language balance EU24</th>
-            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using EU24 plus Icelandic and Norwegian languages.">Language balance EU24+is,no</th>
-            <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no</th>
+            <th scope="col" data-toggle="tooltip" title="Domains detected from seed URL">Url <a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).">Normalised Language balance (Score)<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using HTML pages as unit.">LDI pages<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Lieberson's diversity index calculated using words as unit.">LDI words<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.">Language balance<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using only EU24 languages.">Language balance EU24<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="Language balance, calculated using EU24 plus Icelandic and Norwegian languages.">Language balance EU24+is,no<a href="#help" class="help-anchor">?</a></th>
+            <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no<a href="#help" class="help-anchor">?</a></th>
             <!-- <th scope="col" data-toggle="tooltip" title="How many of EU24 languages are represented in this website.">Coverage EU24</th> -->
             <!-- <th scope="col" data-toggle="tooltip" title="How many of EU24 plus Icelandic and Norwegian languages are represented in this website.">Coverage EU24+is,no</th> -->
             <!-- <th scope="col">Language count</th> -->
@@ -260,66 +307,79 @@
         <tbody>
           
         </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="8">
+              
+            </th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
 
-  <div class="col-md-10 offset-1 download_results_wrapper">
-      <hr class="mb-4">
-      <a href="score?q=download_results">Download results</a>
+ <div class="row">
+    <div class="col-md-10 offset-1 download_results_wrapper">
+        <a href="score?q=download_results">Download results</a>
+    </div>
+    <div class="col-md-10 offset-1 download_results_wrapper">
+      <a href="score?q=download_detailed_results">Download detailed results</a>
+    </div>
+</div> 
+
+<div id="help" class="mt-5 download_results_wrapper">
+  <div class="row">
+    <div class="col-md-10 offset-1">
+      <hr class="help-line">
+  <div class="term">
+    <span class="name">Url</span>
+    <span class="description">Domains detected from seed URLs. Detection of domains is performed by splitting each URL into parts and using domain parts together with top-level domain suffix to construct a common "domain name". This way both "de.example.com" and "fr.example.com" are assigned to the same domain "example.com". On the other hand, using this approach "example.de" and "example.fr" are evaluated as two separate websites.</span>
   </div>
-  <div class="col-md-10 offset-1 download_results_wrapper">
-    <hr class="mb-4">
-    <a href="score?q=download_detailed_results">Download detailed results</a>
+  <div class="term">
+    <span class="name">Lieberson’s diversity index</span>
+    <span class="description">A widely used index of linguistic diversity is Lieberson’s diversity index (LDI) (Lieberson 1981). It is defined as: <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents the share of i-th language speakers in a community. LDI is 0 if community speaks one language , while higher LDI means larger linguistic diversity. As implemented in the tool, LDI represents how content is distributed in various languages and how many languages are present on a site. When content is in one dominant language, LDI is 0, and as count of documents in various languages increases, LDI approaches 1 (or 100%, as displayed by tool). We calculate LDI both on per-page (in this case P<sub>i</sub> represents share of pages in i-th language) and per-word (in this case P<sub>i</sub> represents share of words in i-th language) basis to detect situation when text in dominant language is long, while in other languages text may be shorter (e.g., only summaries).</span>
+  </div>
+  <div class="term">
+    <span class="name">LDI pages</span>
+    <span class="description">Lieberson's diversity index calculated using HTML pages as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of pages in i-th language</span>
+  </div>
+  <div class="term">
+    <span class="name">LDI words</span>
+    <span class="description">Lieberson's diversity index calculated using words as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of words in i-th language</span>
+  </div>
+  <div class="term">
+    <span class="name">Language balance</span>
+    <span class="description">Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.</span>
+  </div>
+  <div class="term">
+    <span class="name">Language balance EU24</span>
+    <span class="description">Language balance, calculated using only EU24 languages.</span>
+  </div>
+  <div class="term">
+    <span class="name">Language balance EU24+is,no</span>
+    <span class="description">Language balance, calculated using EU24 plus Icelandic and Norwegian languages.</span>
+  </div>
+  <div class="term">
+    <span class="name">Normalised Language balance (Score)</span>
+    <span class="description">Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).</span>
+  </div>
+  <div class="term">
+    <span class="name">Coverage EU24+is,no</span>
+    <span class="description">How many of EU24 plus Icelandic and Norwegian languages are represented in this website.</span>
+  </div>
+  <div class="term">
+    <span class="name">Coverage EU24</span>
+    <span class="description">How many of EU24 languages are represented in this website.</span>
+  </div>
+  <div class="term">
+    <span class="name">Coverage EU24+is,no</span>
+    <span class="description">How many of EU24 plus Icelandic and Norwegian languages are represented in this website.</span>
+  </div>
+</div>
+</div>
 </div>
 
-  <footer class="my-5 pt-5 text-muted text-center text-small">
-    <div id="help">
-      <div class="term">
-        <div class="name">Url</div>
-        <div class="description">Domains detected from seed URLs. Detection of domains is performed by splitting each URL into parts and using domain parts together with top-level domain suffix to construct a common "domain name". This way both "de.example.com" and "fr.example.com" are assigned to the same domain "example.com". On the other hand, using this approach "example.de" and "example.fr" are evaluated as two separate websites.</div>
-      </div>
-      <div class="term">
-        <div class="name">Lieberson’s diversity index</div>
-        <div class="description">A widely used index of linguistic diversity is Lieberson’s diversity index (LDI) (Lieberson 1981). It is defined as: <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents the share of i-th language speakers in a community. LDI is 0 if community speaks one language , while higher LDI means larger linguistic diversity. As implemented in the tool, LDI represents how content is distributed in various languages and how many languages are present on a site. When content is in one dominant language, LDI is 0, and as count of documents in various languages increases, LDI approaches 1 (or 100%, as displayed by tool). We calculate LDI both on per-page (in this case P<sub>i</sub> represents share of pages in i-th language) and per-word (in this case P<sub>i</sub> represents share of words in i-th language) basis to detect situation when text in dominant language is long, while in other languages text may be shorter (e.g., only summaries).</div>
-      </div>
-      <div class="term">
-        <div class="name">LDI pages</div>
-        <div class="description">Lieberson's diversity index calculated using HTML pages as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of pages in i-th language</div>
-      </div>
-      <div class="term">
-        <div class="name">LDI words</div>
-        <div class="description">Lieberson's diversity index calculated using words as unit. <img class="mx-auto" src="/images/LDI.png" alt="" width="100" height="30"> where P<sub>i</sub> represents share of words in i-th language</div>
-      </div>
-      <div class="term">
-        <div class="name">Language balance</div>
-        <div class="description">Calculate Share(n) as share of each language against largest; Number of languages found in a website as N. Language balance is then = sum(Share1, Share2, …, ShareN)/N. Maximum is 100 if amount of content in all languages present is equal.</div>
-      </div>
-      <div class="term">
-        <div class="name">Language balance EU24</div>
-        <div class="description">Language balance, calculated using only EU24 languages.</div>
-      </div>
-      <div class="term">
-        <div class="name">Language balance EU24+is,no</div>
-        <div class="description">Language balance, calculated using EU24 plus Icelandic and Norwegian languages.</div>
-      </div>
-      <div class="term">
-        <div class="name">Normalised Language balance (Score)</div>
-        <div class="description">Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).</div>
-      </div>
-      <div class="term">
-        <div class="name">Coverage EU24+is,no</div>
-        <div class="description">How many of EU24 plus Icelandic and Norwegian languages are represented in this website.</div>
-      </div>
-      <div class="term">
-        <div class="name">Coverage EU24</div>
-        <div class="description">How many of EU24 languages are represented in this website.</div>
-      </div>
-      <div class="term">
-        <div class="name">Coverage EU24+is,no</div>
-        <div class="description">How many of EU24 plus Icelandic and Norwegian languages are represented in this website.</div>
-      </div>
-    </div>
+  <footer class="py-5 text-muted text-center text-small">
     <p class="mb-1">© 2021 Tilde <img class="inline-logo" src="https://tilde.com/themes/custom/drupal8_zymphonies_theme/logo.svg" alt=""> </p>
     <!-- <ul class="list-inline">
       <li class="list-inline-item"><a href="#">Privacy</a></li>
@@ -652,6 +712,15 @@ crossorigin="anonymous"></script>
                         $("h1").html("File <b>"+file.name+"</b> selected for uploading");
                         $(".clear-button").show();
 
+                    });
+
+                    $(".help-anchor").on('click', function (e) { 
+                      e.stopPropagation();
+                        e.preventDefault();
+                     
+                        document.querySelector("#help").scrollIntoView({
+                            behavior: 'smooth'
+                        });
                     });
               });
 
