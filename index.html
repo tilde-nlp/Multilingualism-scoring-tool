@@ -332,6 +332,18 @@
     <div class="col-md-10 offset-1">
       <hr class="help-line">
   <div class="term">
+    <span class="name">Multilingualism Scoring Tool</span>
+    <span class="description">The tool is designed to crawl websites and evaluate multilinguality of websites. The tool works by crawling the list of websites and analyzing each website - extracting textual content and detecting languages present.</span>
+  </div>
+  <div class="term">
+    <span class="name">Language selection</span>
+    <span class="description">The tool uses ISO 639-1 codes for language identification and export to csv. Tool is designed to weigh languages as belonging to one of 3 lists: primary languages (by default those are 24 EU official languages), secondary languages (by default those are Icelandic and Norwegian) and other. Default values may be changed by editing configuration file "report_settings.ini". Language groups are considered when calculating normalised language balance – the final score, as well as Language balance EU24, Language balance EU24+is and no languages, coverage EU24 and other metrics. </span>
+  </div>
+  <div class="term">
+    <span class="name">EU24 languages</span>
+    <span class="description">Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, German, Greek, Hungarian, Irish, Italian, Latvian, Lithuanian, Maltese, Polish, Portuguese, Romanian, Slovak, Slovenian, Spanish, Swedish. ISO 639-1 codes are used for export to CSV.</span>
+  </div>
+  <div class="term">
     <span class="name">Url</span>
     <span class="description">Domains detected from seed URLs. Detection of domains is performed by splitting each URL into parts and using domain parts together with top-level domain suffix to construct a common "domain name". This way both "de.example.com" and "fr.example.com" are assigned to the same domain "example.com". On the other hand, using this approach "example.de" and "example.fr" are evaluated as two separate websites.</span>
   </div>
@@ -353,19 +365,15 @@
   </div>
   <div class="term">
     <span class="name">Language balance EU24</span>
-    <span class="description">Language balance, calculated using only EU24 languages.</span>
+    <span class="description">Language balance, calculated using only EU24 languages. Other languages present on a website are ignored when calculating this score.</span>
   </div>
   <div class="term">
     <span class="name">Language balance EU24+is,no</span>
-    <span class="description">Language balance, calculated using EU24 plus Icelandic and Norwegian languages.</span>
+    <span class="description">Language balance, calculated using EU24 plus Icelandic and Norwegian languages. Other languages present on a website are ignored when calculating this score.</span>
   </div>
   <div class="term">
     <span class="name">Normalised Language balance (Score)</span>
     <span class="description">Language balance * coverage. Range from 0 (No content in any of EU24 languages) to 100 (Equal amount of text in all EU24 languages).</span>
-  </div>
-  <div class="term">
-    <span class="name">Coverage EU24+is,no</span>
-    <span class="description">How many of EU24 plus Icelandic and Norwegian languages are represented in this website.</span>
   </div>
   <div class="term">
     <span class="name">Coverage EU24</span>
