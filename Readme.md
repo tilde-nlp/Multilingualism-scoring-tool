@@ -1,31 +1,42 @@
-Format - Dockers  
-Interface - web forma   
+Format - Docker  
+Interface - web form   
 Crawler - Scrapy  
-Boilerplate - justext/trafilatura/html_text  
-Lang detect - langdetect/fasttext   
-Glue code - python  
+Boilerplate - justext  
+Language detector - langdetect   
+Glue code - python 3.9 
 
-Input list of domain names (possibly as file)  
-Output list of scores (possibly as file) + detailed report  
+Input: list of URLs (both as text input, and simple txt file)  
+Output: list of scores (on website) + download simple and detailed csv  
 
 
 # Dependencies
 pip install scrapy  
 pip install tldextract  
-pip install justext OR pip install trafilatura OR pip install html_text  for text extraction/boilerplate removal  
-pip install langdetect OR pip install pybind11 + pip install fasttext   
+pip install justext for text extraction/boilerplate removal  
+pip install langdetect  
 
 python=3.9.4
 Scrapy-2.5.0
 tldextract-3.1.0
 jusText-2.2.0
-trafilatura-0.8.2
-html_text-0.5.2
 langdetect-1.0.8
 
-# Additional note 
+# Additional notes 
+The tool and some tests do not run on Windows due to different implementation of multiprocessing from Linux. 
+On Windows WSL (Windows Subsystem for Linux) may be used to launch the tool from command line.
+
 Langdetect needs irish, maltese and korean model files updated:  
 copy files from "dist\langdetect\profiles\"  
 to folder where langdetect is installed in your system.  
-On windows it will be something like  
-"C:\ProgramData\Anaconda3\envs\python3.8\Lib\site-packages\langdetect\profiles\"
+On linux it will be something like  
+"/usr/local/lib/python3.9/site-packages/langdetect/profiles/"
+
+# Run the tool
+- From Linux command line: "python app.py" starts the web service.
+- Using docker (on local machine):
+	- docker build --tag scorer . --no-cache
+	- docker run -p 8989:8989 -t scorer
+	- tool then may be accessed on http://localhost:8989/score
+- Tests may be run usin command "python -m unittest discover -s tests"
+- Test with offline websites may be run using command "python test_all_sites.py" . Note that to test on offline websites, these offline websites must be preseont in tests\offline_sites\ folder. 
+
