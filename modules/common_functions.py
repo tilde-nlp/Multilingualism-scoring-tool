@@ -9,11 +9,10 @@ import justext
 
 
 def is_ok_job_name(job_name:str) -> bool:
-    # this will be a file name, so alphanumerics only
-    if not job_name.isalnum():
+    if all(x.isalpha() or x.isspace() or x.isnumeric() for x in job_name):
+        return True
+    else:
         return False
-    return True
-
 
 def extractDomain(url):
     if "http" in str(url) or "www" in str(url):
@@ -54,9 +53,6 @@ def extractTextXPath(response):
 # def extractTextJustext(response):
 def extractText(response):
     text_lines = []
-    # paragraphs = justext.justext(response.content, justext.get_stoplist("English"))
-    # print(len(response.text))
-    # print("Stopwords: ", justext.get_stoplist("English"))
     paragraphs = justext.justext(response.text, frozenset(), stopwords_low=10,stopwords_high=0)
     for paragraph in paragraphs:
         # print("Paragraph is boilerplate:{}; {}".format(paragraph.is_boilerplate, paragraph.text))

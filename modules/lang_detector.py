@@ -24,7 +24,7 @@ class LanguageDetector:
         except Exception as e:
             detected_lang = None
         return detected_lang
-        # ga added by copying from ilsp-fc to C:\ProgramData\Anaconda3\envs\p3.8torch\Lib\site-packages\langdetect\profiles
+        # ga added by copying to C:\ProgramData\Anaconda3\envs\p3.8torch\Lib\site-packages\langdetect\profiles
 
 
 class LanguageDetectorFasttext:

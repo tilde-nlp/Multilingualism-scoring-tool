@@ -47,12 +47,13 @@ class Analyzer():
 
         total_words = len(plaintext.split())
 
-        outfilename = os.path.join(self.data_dir, filename + ".txt")
-        with open(outfilename, 'a', encoding="utf-8") as outf:
-            outf.write('\n\n==========================================\n')
-            outf.write(f"Detected language: {detected_main_language}\n")
-            outf.write(f"URL: {url}\n")
-            outf.write(plaintext)
+        # Write extracted text to file during development. Or as a feature later?
+        # outfilename = os.path.join(self.data_dir, filename + ".txt")
+        # with open(outfilename, 'a', encoding="utf-8") as outf:
+        #     outf.write('\n\n==========================================\n')
+        #     outf.write(f"Detected language: {detected_main_language}\n")
+        #     outf.write(f"URL: {url}\n")
+        #     outf.write(plaintext)
 
         outfilename = os.path.join(self.data_dir, filename + ".tsv")
         with open(outfilename, 'a', encoding="utf-8") as outf:

@@ -93,12 +93,10 @@ class Reporter():
                     langs_words[data[3]] = langs_words.get(data[3], 0) + words_in_a_doc
                 stats['total_pages'] = stats['total_pages'] + 1
                 stats['total_words'] = stats['total_words'] + words_in_a_doc
-        # print(langs)
         lang_count = len(langs)
 
         stats['lang_count'] = lang_count if lang_count > 0 else 1
 
-        # update: ELRC. Multilingualism Scoring Tool. Language Balance.xlsx
         # language_balance = average(count_l1, count_l2, ..., count_ln)/count_max
         largest = max(langs, key=langs.get)
         largest_value = langs.get(largest, 1)
@@ -161,8 +159,6 @@ class Reporter():
         if stats == None:
             return 0
         self.logger.log(logging.DEBUG, f"Reporter using PRIMARY_LANGUAGES: {self.primary_langs}")
-        # factor = 1 if stats['lang_count'] > 1 else 0 # lang_count/26    # If single lang balance == 0 
-        # score = factor * stats['language_balance']
         score = stats['language_balance_primary'] * stats['coverage_primary']
         return score
 

@@ -66,7 +66,7 @@ class ScoringTool():
                 self.process.stop()
                 self.status = "stopping"
         except Exception as e:
-            print(e)
+            self.logger.debug("Empty queue exception "+str(e))
             pass
         try:
             if self.process is None:
@@ -80,7 +80,7 @@ class ScoringTool():
             else:
                 self.status = "ready"
         except Exception as e:
-            print(f"Exception: {e}")
+            self.logger.error("Exception "+str(e))
 
         current_status = {}
         try:
@@ -225,19 +225,18 @@ class ScoringTool():
 
         self.allowed_domains = [extractDomain(i) for i in self.urls]
         self.allowed_domains = list(set(self.allowed_domains))
-        # print(f'\nPrepared allowed_domains {allowed_domains}\n')
 
         def dump_config_to_file_for_debug():
-            with open('settings.cfg', 'w', encoding='utf-8') as of:
+            with open('setting_dump.cfg', 'w', encoding='utf-8') as of:
                 for key, value in self.settings.items():
                     of.write(f'{key}, {value}\n')
-        dump_config_to_file_for_debug()
+        # dump_config_to_file_for_debug()
 
         def clean_analyzed_dir_before_running():
             try:
                 shutil.rmtree(self.analyzer_data_dir)
             except Exception as e:
-                print("Exception "+str(e))
+                self.logger.warning("Exception "+str(e))
                 pass
         clean_analyzed_dir_before_running()
 
@@ -283,7 +282,7 @@ class ScoringTool():
                 self.p.terminate()
                 time.sleep(0.1)
             except Exception as e:
-                print(e)
+                self.logger.warning("Stop crawl: Exception "+str(e))
             self.status = "stopping"
         elif self.status == "stopping":
             self.p.terminate()
