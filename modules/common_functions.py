@@ -9,6 +9,8 @@ import justext
 
 
 def is_ok_job_name(job_name:str) -> bool:
+    if not job_name.strip():
+        return False
     if all(x.isalpha() or x.isspace() or x.isnumeric() for x in job_name):
         return True
     else:
@@ -40,14 +42,14 @@ def segmentText(text):
 
 
 
-def extractTextXPath(response):
-    text = response.xpath('//body//text()').extract()
-    text = ' '.join(text)
-    text = text.replace('  ',' ')
-    text_lines = text.split('\n')
-    text_lines = [text_line.strip() for text_line in text_lines if text_line.strip()]
-    text = '\n'.join(text_lines)
-    return text
+# def extractTextXPath(response):
+#     text = response.xpath('//body//text()').extract()
+#     text = ' '.join(text)
+#     text = text.replace('  ',' ')
+#     text_lines = text.split('\n')
+#     text_lines = [text_line.strip() for text_line in text_lines if text_line.strip()]
+#     text = '\n'.join(text_lines)
+#     return text
 
 # justext
 # def extractTextJustext(response):

@@ -28,22 +28,6 @@ class TestSpider(unittest.TestCase):
             def log_message(self, format, *args):
                 pass
 
-        directory = OFFLINE_DIR + r'/www.bmw.com'
-        class Handler(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory, **kwargs)
-        server_address = ('127.0.0.1', PORT)
-        httpd = HTTPServer(server_address, Handler)
-        start_server_in_separate_thread(httpd)
-
-        directory2 = OFFLINE_DIR + r'/www.memorywater.com'
-        class Handler2(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory2, **kwargs)
-        server_address2 = ('127.0.0.2', PORT)
-        httpd2 = HTTPServer(server_address2, Handler2)
-        start_server_in_separate_thread(httpd2)
-
         directory3 = OFFLINE_DIR + r'/www.tilde.lv'
         class Handler3(QuietHandler):
             def __init__(self, *args, **kwargs):
@@ -51,14 +35,6 @@ class TestSpider(unittest.TestCase):
         server_address3 = ('127.0.0.3', PORT)
         httpd3 = HTTPServer(server_address3, Handler3)
         start_server_in_separate_thread(httpd3)
-
-        directory4 = OFFLINE_DIR + r'/gorny.edu.pl'
-        class Handler4(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory4, **kwargs)
-        server_address4 = ('127.0.0.4', PORT)
-        httpd4 = HTTPServer(server_address4, Handler4)
-        start_server_in_separate_thread(httpd4)
 
         directory5 = OFFLINE_DIR + r'/www.norden.org'
         class Handler5(QuietHandler):
@@ -84,46 +60,6 @@ class TestSpider(unittest.TestCase):
         httpd7 = HTTPServer(server_address7, Handler7)
         start_server_in_separate_thread(httpd7)
 
-        directory8 = OFFLINE_DIR + r'/www.royalfloraholland.com'
-        class Handler8(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory8, **kwargs)
-        server_address8 = ('127.0.0.8', PORT)
-        httpd8 = HTTPServer(server_address8, Handler8)
-        start_server_in_separate_thread(httpd8)
-
-        directory9 = OFFLINE_DIR + r'/luxexpress.eu'
-        class Handler9(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory9, **kwargs)
-        server_address9 = ('127.0.0.9', PORT)
-        httpd9 = HTTPServer(server_address9, Handler9)
-        start_server_in_separate_thread(httpd9)
-
-        directory10 = OFFLINE_DIR + r'/aerodium.technology'
-        class Handler10(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory10, **kwargs)
-        server_address10 = ('127.0.0.10', PORT)
-        httpd10 = HTTPServer(server_address10, Handler10)
-        start_server_in_separate_thread(httpd10)
-
-        directory11 = OFFLINE_DIR + r'/www.madaracosmetics.com'
-        class Handler11(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory11, **kwargs)
-        server_address11 = ('127.0.0.11', PORT)
-        httpd11 = HTTPServer(server_address11, Handler11)
-        start_server_in_separate_thread(httpd11)
-
-        directory12 = OFFLINE_DIR + r'/www.airbaltic.com'
-        class Handler12(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory12, **kwargs)
-        server_address12 = ('127.0.0.12', PORT)
-        httpd12 = HTTPServer(server_address12, Handler12)
-        start_server_in_separate_thread(httpd12)
-
         directory13 = OFFLINE_DIR + r'/census.gov.uk'
         class Handler13(QuietHandler):
             def __init__(self, *args, **kwargs):
@@ -134,18 +70,10 @@ class TestSpider(unittest.TestCase):
 
 
         urls = [
-            f'http://127.0.0.1:{PORT}/', 
-            f'http://127.0.0.2:{PORT}/', 
             f'http://127.0.0.3:{PORT}/', 
-            f'http://127.0.0.4:{PORT}/',
             f'http://127.0.0.5:{PORT}/', 
             f'http://127.0.0.6:{PORT}/',
             f'http://127.0.0.7:{PORT}/', 
-            f'http://127.0.0.8:{PORT}/',
-            f'http://127.0.0.9:{PORT}/', 
-            f'http://127.0.0.10:{PORT}/',
-            f'http://127.0.0.11:{PORT}/', 
-            f'http://127.0.0.12:{PORT}/',
             f'http://127.0.0.13:{PORT}/',
             ]
         config = configparser.ConfigParser(interpolation=None)
@@ -159,7 +87,7 @@ class TestSpider(unittest.TestCase):
         
         response = scorer.start_crawl(urls, hops=1)
         self.assertEqual(response['status'], "crawling")
-        self.assertEqual(response['message'], "Started crawling of 13 urls.") 
+        self.assertEqual(response['message'], "Started crawling of 5 urls.") 
         response = scorer.start_crawl(urls, hops=1)
         self.assertEqual(response['status'], "error")
         self.assertEqual(response['message'], "Can not start, already crawling.") 
@@ -183,17 +111,9 @@ class TestSpider(unittest.TestCase):
 
 
         response = scorer.get_current_stats()
-        score, stats = response['127.0.0.1']
-        self.assertEqual(score, '4.17') # 1 * 1 / 24 # pl balance 1/24 eu langs
-        score, stats = response['127.0.0.2'] # lv, en. should be between 4,17-8.34
-        self.assertGreaterEqual(float(score), 4.17)
-        self.assertLessEqual(float(score), 8.34)
 
         score, stats = response['127.0.0.3']
         self.assertEqual(score, '4.17') # monolingual - latvian
-
-        score, stats = response['127.0.0.4']
-        self.assertEqual(score, '4.17') # monolingual - polish 1 * 1 / 24 = 4.17
 
         score, stats = response['127.0.0.5']
         self.assertNotEqual(score, '0.00')
@@ -201,31 +121,13 @@ class TestSpider(unittest.TestCase):
         self.assertNotEqual(score, '0.00')
         score, stats = response['127.0.0.7']
         self.assertNotEqual(score, '0.00')
-        score, stats = response['127.0.0.8']
-        self.assertNotEqual(score, '0.00')
-        score, stats = response['127.0.0.9']
-        self.assertNotEqual(score, '0.00')
-        score, stats = response['127.0.0.10']
-        self.assertNotEqual(score, '0.00')
-        score, stats = response['127.0.0.11']
-        self.assertEqual(score, '0.00') # Restricted by robots.txt
-        score, stats = response['127.0.0.12']
-        self.assertEqual(score, '0.00') # Content served using js
         score, stats = response['127.0.0.13']
         self.assertNotEqual(score, '0.00')
 
-        httpd.shutdown()
-        httpd2.shutdown()
         httpd3.shutdown()
-        httpd4.shutdown()
         httpd5.shutdown()
         httpd6.shutdown()
         httpd7.shutdown()
-        httpd8.shutdown()
-        httpd9.shutdown()
-        httpd10.shutdown()
-        httpd11.shutdown()
-        httpd12.shutdown()
         httpd13.shutdown()
 
 if __name__ == '__main__':
