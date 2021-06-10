@@ -1,3 +1,8 @@
+# About Multilingualism Scoring Tool 
+The Multilingualism Scoring Tool analyses web sites based on the contents and languages used in their web pages. 
+The tool crawls each site page by page, extracts its contents, detects the language of each page and other language related relevant data. 
+Lastly, it creates some statistics and calculates multilingualism scores based on the data and statistics obtained.
+
 Format - Docker  
 Interface - web form   
 Crawler - Scrapy  
@@ -37,6 +42,6 @@ On linux it will be something like
 	- docker build --tag scorer . --no-cache
 	- docker run -p 8989:8989 -t scorer
 	- tool then may be accessed on http://localhost:8989/score
-- Tests may be run usin command "python -m unittest discover -s tests"
+- Tests may be run using command "python -m unittest discover -s tests"
 - Test with offline websites may be run using command "python test_all_sites.py" . Note that to test on offline websites, these offline websites must be preseont in tests\offline_sites\ folder. 
 
