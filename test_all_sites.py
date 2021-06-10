@@ -52,14 +52,6 @@ class TestSpider(unittest.TestCase):
         httpd6 = HTTPServer(server_address6, Handler6)
         start_server_in_separate_thread(httpd6)
 
-        directory7 = OFFLINE_DIR + r'/globalvoices.org'
-        class Handler7(QuietHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=directory7, **kwargs)
-        server_address7 = ('127.0.0.7', PORT)
-        httpd7 = HTTPServer(server_address7, Handler7)
-        start_server_in_separate_thread(httpd7)
-
         directory13 = OFFLINE_DIR + r'/census.gov.uk'
         class Handler13(QuietHandler):
             def __init__(self, *args, **kwargs):
@@ -73,7 +65,6 @@ class TestSpider(unittest.TestCase):
             f'http://127.0.0.3:{PORT}/', 
             f'http://127.0.0.5:{PORT}/', 
             f'http://127.0.0.6:{PORT}/',
-            f'http://127.0.0.7:{PORT}/', 
             f'http://127.0.0.13:{PORT}/',
             ]
         config = configparser.ConfigParser(interpolation=None)
@@ -119,15 +110,12 @@ class TestSpider(unittest.TestCase):
         self.assertNotEqual(score, '0.00')
         score, stats = response['127.0.0.6']
         self.assertNotEqual(score, '0.00')
-        score, stats = response['127.0.0.7']
-        self.assertNotEqual(score, '0.00')
         score, stats = response['127.0.0.13']
         self.assertNotEqual(score, '0.00')
 
         httpd3.shutdown()
         httpd5.shutdown()
         httpd6.shutdown()
-        httpd7.shutdown()
         httpd13.shutdown()
 
 if __name__ == '__main__':
