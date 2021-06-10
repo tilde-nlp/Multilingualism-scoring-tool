@@ -524,10 +524,27 @@ crossorigin="anonymous"></script>
                                     averageScore = averageScore + parseFloat(dataRow[1]);
                                     urlsToScore = urlsToScore + 1;
                                   }
+
+                                  let langs = [];
+                                  let langOutput = "";
+                                  for (const [key, value] of Object.entries(dataRow[2].langs)) {
+                                    const tempLang = [key, value];
+                                    langs.push(tempLang);
+                                  }
+
+                                  if (langs.length > 2) {
+                                    langOutput = dataRow[2].covered_extended;
+                                  } else {
+                                    langs = langs.map(elem => {
+                                      return elem[0];
+                                    
+                                    });
+                                    langOutput = langs.join(", ");
+                                  }
                                   
                                   let tablerow = "<tr>";
                                   tablerow += "<th scope='row'>"+dataRow[0]+"</th>";
-                                  tablerow += "<td>"+dataRow[2].covered_extended+"</td>";
+                                  tablerow += "<td>"+langOutput+"</td>";
                                   tablerow += "<td>"+dataRow[1]+"</td>";
                                   tablerow += "<td>"+dataRow[2].LDI_pages+"</td>";
                                   tablerow += "<td>"+dataRow[2].LDI_words+"</td>";
