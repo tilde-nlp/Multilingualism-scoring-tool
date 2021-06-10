@@ -67,12 +67,12 @@ class Reporter():
             'covered_extended':"0",
         }
         if not os.path.exists(self.data_dir):
-            self.logger.log(logging.ERROR,f"Could not find data dir: {self.data_dir}")
+            self.logger.error(f"Could not find data dir: {self.data_dir}")
             return stats
         filename = domain.replace(".","_")
         filename = os.path.join(self.data_dir, filename + ".tsv")
         if not os.path.exists(filename):
-            self.logger.log(logging.ERROR,f"Could not find file for score calculation: {filename}")
+            self.logger.debug(f"Could not find file for score calculation: {filename}")
             return stats
         rows = []
 
