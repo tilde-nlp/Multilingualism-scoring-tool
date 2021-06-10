@@ -15,16 +15,11 @@ Output: list of scores (on website) + download simple and detailed csv
 
 
 # Dependencies
-pip install scrapy  
-pip install tldextract  
-pip install justext for text extraction/boilerplate removal  
-pip install langdetect  
-
-python=3.9.4
-Scrapy-2.5.0
-tldextract-3.1.0
-jusText-2.2.0
-langdetect-1.0.8
+pip install scrapy==2.5.0 
+pip install tldextract==3.1.0  
+pip install justext==2.2.0 
+pip install langdetect==1.0.8   
+pip install tornado==6.1 
 
 # Additional notes 
 The tool and some tests do not run on Windows due to different implementation of multiprocessing from Linux. 
