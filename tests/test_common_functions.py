@@ -1,5 +1,5 @@
 import unittest
-from modules.common_functions import extractDomain, extractText, segmentText
+from modules.common_functions import extractDomain, extractText, segmentText, is_ok_job_name
 
 from scrapy.http.request import Request
 from scrapy.http.response.text import TextResponse
@@ -95,6 +95,30 @@ class TestSegmenter(unittest.TestCase):
         expected = "This is first sentence.\nThis is second."
         segmented = segmentText(text)
         self.assertEqual(segmented, expected)
+
+
+class TestJobname(unittest.TestCase):
+    def test_none(self):
+        expected = False
+        self.assertEqual(is_ok_job_name(""), expected)
+
+    def test_good(self):
+        expected = True
+        self.assertEqual(is_ok_job_name("good name"), expected)
+        self.assertEqual(is_ok_job_name("Good name"), expected)
+        self.assertEqual(is_ok_job_name("1G00d name"), expected)
+        self.assertEqual(is_ok_job_name("1G00dName"), expected)
+        self.assertEqual(is_ok_job_name("1"), expected)
+        self.assertEqual(is_ok_job_name("a"), expected)
+
+    def test_bad(self):
+        expected = False
+        self.assertEqual(is_ok_job_name("bad_name"), expected)
+        self.assertEqual(is_ok_job_name(" "), expected)
+        self.assertEqual(is_ok_job_name("-"), expected)
+        self.assertEqual(is_ok_job_name("?"), expected)
+        self.assertEqual(is_ok_job_name("/"), expected)
+        self.assertEqual(is_ok_job_name("#"), expected)
 
 if __name__ == '__main__':
     unittest.main()
