@@ -139,13 +139,25 @@ def run_scoring_web():
     report_config.read('report_settings.ini')
 
     PORT = '8989'
-    configure_logging({
-        'LOG_FILE' : config.get('app', 'LOG_FILE', fallback='app.log'),
-        'LOG_ENCODING' : config.get('app', 'LOG_ENCODING', fallback='utf-8'),
-        'LOG_FORMAT' : config.get('app', 'LOG_FORMAT', fallback='%(asctime)s %(message)s'),
-        'LOG_DATEFORMAT' : config.get('app', 'LOG_DATEFORMAT', fallback='%H:%M:%S'),
-        'LOG_LEVEL' : getattr(logging, config.get('app', 'LOG_LEVEL', fallback='ERROR').upper()),
-    })
+    # Disable default Scrapy log settings.
+    configure_logging(install_root_handler=False)
+
+    rotating_file_log = logging.handlers.RotatingFileHandler(
+            config.get('crawler', 'LOG_FILE', fallback='app.log'), 
+            maxBytes=1024*1024, 
+            backupCount=1,
+        )
+    rotating_file_log.setFormatter(logging.Formatter(
+            config.get('crawler', 'LOG_FORMAT', fallback='%(asctime)s %(message)s')
+        ))
+    rotating_file_log.setLevel(
+            level=getattr(logging, config.get('crawler', 'LOG_LEVEL', fallback='ERROR').upper()),
+        )
+    logging.basicConfig(
+            handlers = [rotating_file_log],
+            format=config.get('crawler', 'LOG_FORMAT', fallback='%(asctime)s %(message)s'),
+        )
+
     logger = logging.getLogger("app")
     logger.debug("App logger started")
     scorer = ScoringTool(config, report_config)
