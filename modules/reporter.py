@@ -98,7 +98,12 @@ class Reporter():
         stats['lang_count'] = lang_count if lang_count > 0 else 1
 
         # language_balance = average(count_l1, count_l2, ..., count_ln)/count_max
-        largest = max(langs, key=langs.get)
+        try:
+            largest = max(langs, key=langs.get)
+        except:
+            # if no largest, there are no text/languages detected
+            self.logger.error(f"Could not detect 'largest' language for domain: {domain}")
+            return stats
         largest_value = langs.get(largest, 1)
         langs_primary = {}
         langs_extended = {}
