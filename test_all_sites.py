@@ -78,7 +78,7 @@ class TestSpider(unittest.TestCase):
         
         response = scorer.start_crawl(urls, hops=1)
         self.assertEqual(response['status'], "crawling")
-        self.assertEqual(response['message'], "Started crawling of 5 urls.") 
+        self.assertEqual(response['message'], "Started crawling of 4 urls.") 
         response = scorer.start_crawl(urls, hops=1)
         self.assertEqual(response['status'], "error")
         self.assertEqual(response['message'], "Can not start, already crawling.") 

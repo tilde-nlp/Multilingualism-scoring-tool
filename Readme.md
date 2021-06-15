@@ -33,10 +33,14 @@ On linux it will be something like
 
 # Run the tool
 - From Linux command line: "python app.py" starts the web service.
-- Using docker (on local machine):
-	- docker build --tag scorer . --no-cache
-	- docker run -p 8989:8989 -t scorer
+- Using docker build (on local machine): 
+	- docker build --tag scorer . --no-cache 
+	- docker run -p 8989:8989 -t scorer 
 	- tool then may be accessed on http://localhost:8989/score
-- Tests may be run using command "python -m unittest discover -s tests"
+- Alternative using github packages: 
+	- docker pull ghcr.io/tilde-nlp/multilingualism-scoring-tool:master 
+	- docker run -p 8989:8989 -t ghcr.io/tilde-nlp/multilingualism-scoring-tool:master  
+ 	- tool then may be accessed on http://localhost:8989/score 
+- Tests may be run using command "python -m unittest discover -s tests" 
 - Test with offline websites may be run using command "python test_all_sites.py" . Note that to test on offline websites, these offline websites must be preseont in tests\offline_sites\ folder. 
 
