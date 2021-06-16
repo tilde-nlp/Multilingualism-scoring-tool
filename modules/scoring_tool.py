@@ -205,6 +205,8 @@ class ScoringTool():
             self.jobtitle = jobtitle
         def verify_and_try_to_fix_urls(urls: list) -> list:
             stripped_urls = [url.strip() for url in urls if url.strip()]
+            stripped_urls = [url.strip('"') for url in stripped_urls]
+            stripped_urls = [url.strip(';') for url in stripped_urls]
             fixed_urls = []
             for url in stripped_urls:
                 if not url.startswith('http'): # prepend protocol if not present
