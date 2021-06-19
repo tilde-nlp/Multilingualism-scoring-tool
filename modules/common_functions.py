@@ -11,7 +11,7 @@ import justext
 def is_ok_job_name(job_name:str) -> bool:
     if not job_name.strip():
         return False
-    if all(x.isalpha() or x.isspace() or x.isnumeric() for x in job_name):
+    if all(x.isalnum() or x.isspace() or x in '.' for x in job_name):
         return True
     else:
         return False

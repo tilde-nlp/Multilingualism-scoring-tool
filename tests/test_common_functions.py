@@ -110,6 +110,7 @@ class TestJobname(unittest.TestCase):
         self.assertEqual(is_ok_job_name("1G00dName"), expected)
         self.assertEqual(is_ok_job_name("1"), expected)
         self.assertEqual(is_ok_job_name("a"), expected)
+        self.assertEqual(is_ok_job_name("a.1"), expected)
 
     def test_bad(self):
         expected = False

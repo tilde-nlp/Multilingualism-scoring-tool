@@ -5,7 +5,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.80.0">
-    <title>Multilingualism tool</title>
+    <title>Multilingualism Scoring Tool</title>
 
 
     
@@ -607,6 +607,7 @@ crossorigin="anonymous"></script>
                       const hops = $("#hops").val();
                       const titleOfJob = $("#titleOfJob").val(); 
                       const inputFile = $("#input_file")[0].files[0];
+                      let titleOfJobValid = true
 
                       var fd = new FormData();
                       fd.append('input_file', inputFile); //, $("#input_file").val());
@@ -614,7 +615,26 @@ crossorigin="anonymous"></script>
                       fd.append('hops', hops);
                       fd.append('titleOfJob', titleOfJob);
 
-                      if (titleOfJob !== "") {
+                      function findBadChars(value) {
+                        var badChars = ['!','?','#', '$', '%', '/', '<', '>','[', ']', '{', '}', '(', ')', '*', '&', '^', '"'];
+
+                        for (var i = 0; i < badChars.length; i++) {
+                          if (value.indexOf(badChars[i]) > -1) {
+                            return true;
+                          }
+                        }
+                        return false;
+                      }
+
+                      if (titleOfJob == "") {
+                        titleOfJobValid = false;
+                      } else if (findBadChars(titleOfJob)) {
+                        titleOfJobValid = false;
+                      } else {
+                        titleOfJobValid = true;
+                      }
+
+                      if (titleOfJobValid) {
                         $("#crawling-form :input").prop("disabled", true);
                         $("#crawling-form").slideUp();
                         $(".stop-crawl").show().text("Stop crawling").prop("disabled", false).removeClass("stopping");
