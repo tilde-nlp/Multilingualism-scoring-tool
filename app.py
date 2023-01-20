@@ -72,7 +72,7 @@ class ScoringHandler(tornado.web.RequestHandler):
             self.logger.debug(self.request.files)
 
             if self.request.files:
-                self.logger.debug("There is urlFile",self.request.files['input_file'][0]['filename'])
+                self.logger.debug("There is urlFile {}".format(self.request.files['input_file'][0]['filename']))
                 filecontent = self.request.files['input_file'][0]['body']
                 urls = filecontent.decode("utf-8") 
             else:

@@ -1,5 +1,8 @@
 #python=3.9.4
 #setuptools_rust
+cryptography==3.4.7
+pyopenssl==20.0.1
+twisted==21.2.0
 Scrapy==2.5.0
 tldextract==3.1.0
 jusText==2.2.0
